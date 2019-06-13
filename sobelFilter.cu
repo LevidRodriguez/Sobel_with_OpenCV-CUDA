@@ -23,8 +23,8 @@
 
 #define GRIDVAL 20.0 
 
-void sobel_cpu(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height);
-void sobel_omp(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height);
+// void sobel_cpu(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height);
+// void sobel_omp(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height);
 
 /************************************************************************************************
  * void sobel_gpu(const byte*, byte*, uint, uint);
@@ -120,12 +120,12 @@ int main(int argc, char*argv[]) {
 
     /** We first run the sobel filter on just the CPU using only 1 thread **/
     auto c = std::chrono::system_clock::now();
-    sobel_cpu(origImg.pixels, cpuImg.pixels, origImg.width, origImg.height);
+    // sobel_cpu(origImg.pixels, cpuImg.pixels, origImg.width, origImg.height);
     std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;
 
     /** Next, we use OpenMP to parallelize it **/
     c = std::chrono::system_clock::now();
-    sobel_omp(origImg.pixels, ompImg.pixels, origImg.width, origImg.height);
+    // sobel_omp(origImg.pixels, ompImg.pixels, origImg.width, origImg.height);
     std::chrono::duration<double> time_omp = std::chrono::system_clock::now() - c;
 
     /** Finally, we use the GPU to parallelize it further **/
@@ -185,7 +185,8 @@ int main(int argc, char*argv[]) {
  *              uint height : the height of the image
  * 
  ***********************************************************************************************/
-void sobel_cpu(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height) {
+/************************************************************************************************
+ void sobel_cpu(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height) {
     for(int y = 1; y < height-1; y++) {
         for(int x = 1; x < width-1; x++) {
             int dx = (-1*orig[(y-1)*width + (x-1)]) + (-2*orig[y*width+(x-1)]) + (-1*orig[(y+1)*width+(x-1)]) +
@@ -196,7 +197,7 @@ void sobel_cpu(const byte* orig, byte* cpu, const unsigned int width, const unsi
         }
     }
 }
-
+***********************************************************************************************/
 
 /************************************************************************************************
  * void sobel_omp(const byte*, byte*, uint, uint);
@@ -213,7 +214,8 @@ void sobel_cpu(const byte* orig, byte* cpu, const unsigned int width, const unsi
  *              uint height : the height of the image
  * 
  ***********************************************************************************************/
-void sobel_omp(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height) {
+/************************************************************************************************
+ void sobel_omp(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height) {
     #pragma omp parallel for
     for(int y = 1; y < height-1; y++) {
         for(int x = 1; x < width-1; x++) {
@@ -225,4 +227,4 @@ void sobel_omp(const byte* orig, byte* cpu, const unsigned int width, const unsi
         }
     }
 }
-
+***********************************************************************************************/
