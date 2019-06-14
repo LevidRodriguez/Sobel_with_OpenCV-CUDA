@@ -28,9 +28,6 @@
 
 #define GRIDVAL 20.0 
 
-// void sobel_cpu(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height);
-// void sobel_omp(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height);
-
 /************************************************************************************************
  * void sobel_gpu(const byte*, byte*, uint, uint);
  * - This function runs on the GPU, it works on a 2D grid giving the current x, y pair being worked
@@ -57,7 +54,6 @@ __global__ void sobel_gpu(const byte* orig, byte* cpu, const unsigned int width,
         cpu[y*width + x] = sqrt( (dx*dx) + (dy*dy) );
     }
 }
-
 /************************************************************************************************
  * int main(int, char*[])
  * - This function is our program's entry point. The function passes in the command line arguments
@@ -108,10 +104,13 @@ int main(int argc, char*argv[]) {
     struct tm* curTime = localtime(&rawTime);
     char timeBuffer[80] = "";
     strftime(timeBuffer, 80, "edge map benchmarks (%c)\n", curTime);
-    printf("%s", timeBuffer);
+    std::cout << timeBuffer << std::endl;
+    // printf("%s", timeBuffer);
     // printf("CPU: %d hardware threads\n", std::thread::hardware_concurrency());
-    printf("GPGPU: %s, CUDA %d.%d, %zd Mbytes global memory, %d CUDA cores\n",
-    devProp.name, devProp.major, devProp.minor, devProp.totalGlobalMem / 1048576, cores);
+    std::cout << "GPGPU: " << devProp.name << "CUDA "<< devProp.major << devProp.minor << devProp.totalGlobalMem / 1048576 << 
+                " Mbytes global memory, %d CUDA cores\n" << cores <<std::endl;
+    // printf("GPGPU: %s, CUDA %d.%d, %zd Mbytes global memory, %d CUDA cores\n",
+    // devProp.name, devProp.major, devProp.minor, devProp.totalGlobalMem / 1048576, cores);
 
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
 
@@ -122,7 +121,7 @@ int main(int argc, char*argv[]) {
     imgData gpuImg(new byte[origImg.width*origImg.height], origImg.width, origImg.height);
     
     /** We first run the sobel filter on just the CPU using only 1 thread **/
-    // auto c = std::chrono::system_clock::now();
+    auto c = std::chrono::system_clock::now();
     
     /** Finally, we use the GPU to parallelize it further **/
     /** Allocate space in the GPU for our original img, new img, and dimensions **/
@@ -157,62 +156,3 @@ int main(int argc, char*argv[]) {
     cudaFree(gpu_orig); cudaFree(gpu_sobel);
     return 0;
 }
-
-/************************************************************************************************
- * void sobel_cpu(const byte*, byte*, uint, uint);
- * - This function runs on just the CPU with nothing running in parallel. The function takes in 
- * - an original image and compares the pixels to the left and right and then above and below
- * - to find the rate of change of the two comparisons, then squares, adds, and square roots the
- * - pair to find a 'sobel' value, this value is saved into an array of bytes and then loops to
- * - handle the next pixel. The resulting array of evaluated pixels should be of an image showing
- * - in black and white where edges appear in the original image.
- * 
- * Inputs: const byte* orig : the original image being evaluated
- *                byte* cpu : the image being created using the sobel filter
- *               uint width : the width of the image
- *              uint height : the height of the image
- * 
- ***********************************************************************************************/
-/************************************************************************************************
- void sobel_cpu(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height) {
-    for(int y = 1; y < height-1; y++) {
-        for(int x = 1; x < width-1; x++) {
-            int dx = (-1*orig[(y-1)*width + (x-1)]) + (-2*orig[y*width+(x-1)]) + (-1*orig[(y+1)*width+(x-1)]) +
-                 (orig[(y-1)*width + (x+1)]) + (2*orig[y*width+(x+1)]) + (orig[(y+1)*width+(x+1)]);
-            int dy = (orig[(y-1)*width + (x-1)]) + (2*orig[(y-1)*width+x]) + (orig[(y-1)*width+(x+1)]) +
-            (-1*orig[(y+1)*width + (x-1)]) + (-2*orig[(y+1)*width+x]) + (-1*orig[(y+1)*width+(x+1)]);
-            cpu[y*width + x] = sqrt((dx*dx)+(dy*dy));
-        }
-    }
-}
-***********************************************************************************************/
-
-/************************************************************************************************
- * void sobel_omp(const byte*, byte*, uint, uint);
- * - This function runs on the CPU but uses OpenMP to parallelize the for workload. The function
- * - is identical to the sobel_cpu function in what it does, except there is a #pragma call for
- * - the compiler to seperate out the for loop across different cores. Each pixel is able to be 
- * - worked on independantly of all other pixels, so there is no worry of one thread messing up
- * - another thread. The resulting array is the same as the cpu function, producing an image in
- * - black and white of where edges appear in the original image.
- * 
- * Inputs: const byte* orig : the original image being evaluated
- *                byte* cpu : the image being created using the sobel filter
- *               uint width : the width of the image
- *              uint height : the height of the image
- * 
- ***********************************************************************************************/
-/************************************************************************************************
- void sobel_omp(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height) {
-    #pragma omp parallel for
-    for(int y = 1; y < height-1; y++) {
-        for(int x = 1; x < width-1; x++) {
-            int dx = (-1*orig[(y-1)*width + (x-1)]) + (-2*orig[y*width+(x-1)]) + (-1*orig[(y+1)*width+(x-1)]) +
-                 (orig[(y-1)*width + (x+1)]) + (2*orig[y*width+(x+1)]) + (orig[(y+1)*width+(x+1)]);
-            int dy = (orig[(y-1)*width + (x-1)]) + (2*orig[(y-1)*width+x]) + (orig[(y-1)*width+(x+1)]) +
-            (-1*orig[(y+1)*width + (x-1)]) + (-2*orig[(y+1)*width+x]) + (-1*orig[(y+1)*width+(x+1)]);
-            cpu[y*width +x] = sqrt((dx*dx)+(dy*dy));
-        }
-    }
-}
-***********************************************************************************************/
