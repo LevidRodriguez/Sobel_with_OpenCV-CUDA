@@ -49,8 +49,10 @@ __global__ void sobel_gpu(const byte* orig, byte* cpu, const unsigned int width,
     if( x > 0 && y > 0 && x < width-1 && y < height-1) {
         dx = (-1* orig[(y-1)*width + (x-1)]) + (-2*orig[y*width+(x-1)]) + (-1*orig[(y+1)*width+(x-1)]) +
              (    orig[(y-1)*width + (x+1)]) + ( 2*orig[y*width+(x+1)]) + (   orig[(y+1)*width+(x+1)]);
+             
         dy = (    orig[(y-1)*width + (x-1)]) + ( 2*orig[(y-1)*width+x]) + (   orig[(y-1)*width+(x+1)]) +
              (-1* orig[(y+1)*width + (x-1)]) + (-2*orig[(y+1)*width+x]) + (-1*orig[(y+1)*width+(x+1)]);
+        
         cpu[y*width + x] = sqrt( (dx*dx) + (dy*dy) );
     }
 }
@@ -105,8 +107,6 @@ int main(int argc, char*argv[]) {
     char timeBuffer[80] = "";
     strftime(timeBuffer, 80, "edge map benchmarks (%c)\n", curTime);
     std::cout << timeBuffer << std::endl;
-    // printf("%s", timeBuffer);
-    // printf("CPU: %d hardware threads\n", std::thread::hardware_concurrency());
     std::cout << "GPGPU: " << devProp.name << ", CUDA "<< devProp.major << "."<< devProp.minor <<", "<< devProp.totalGlobalMem / 1048576 << 
                 " Mbytes global memory, "<< cores << " CUDA cores\n" <<std::endl;
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
@@ -117,12 +117,10 @@ int main(int argc, char*argv[]) {
     
     imgData gpuImg(new byte[origImg.width*origImg.height], origImg.width, origImg.height);
     
-    // /** We first run the sobel filter on just the CPU using only 1 thread **/
-    // auto c = std::chrono::system_clock::now();
-    
-    /** Finally, we use the GPU to parallelize it further **/
+    /** Use the GPU to parallelize it further **/
     /** Allocate space in the GPU for our original img, new img, and dimensions **/
-    byte *gpu_orig, *gpu_sobel;
+    // byte *gpu_orig, *gpu_sobel;
+    cv::Mat *gpu_orig, *gpu_sobel;
     cudaMalloc( (void**)&gpu_orig, (origImg.width * origImg.height));
     cudaMalloc( (void**)&gpu_sobel, (origImg.width * origImg.height));
     /** Transfer over the memory from host to device and memset the sobel array to 0s **/
