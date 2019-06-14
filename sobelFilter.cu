@@ -43,7 +43,7 @@
  * 
  ***********************************************************************************************/
 // __global__ void sobel_gpu(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height) {
-__global__ void sobel_gpu(cv::Mat* orig, cv::Mat* cpu, const unsigned int width, const unsigned int height) {
+__global__ void sobel_gpu(float* orig, float* cpu, const unsigned int width, const unsigned int height) {
     int x = threadIdx.x + blockIdx.x * blockDim.x;
     int y = threadIdx.y + blockIdx.y * blockDim.y;
     float dx, dy;
@@ -121,7 +121,7 @@ int main(int argc, char*argv[]) {
     /** Use the GPU to parallelize it further **/
     /** Allocate space in the GPU for our original img, new img, and dimensions **/
     // byte *gpu_orig, *gpu_sobel;
-    cv::Mat *gpu_orig, *gpu_sobel;
+    float *gpu_orig, *gpu_sobel;
     cudaMalloc( (void**)&gpu_orig, (origImg.width * origImg.height));
     cudaMalloc( (void**)&gpu_sobel, (origImg.width * origImg.height));
     /** Transfer over the memory from host to device and memset the sobel array to 0s **/
