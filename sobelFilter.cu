@@ -116,26 +116,14 @@ int main(int argc, char*argv[]) {
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
 
     /** Load our img and allocate space for our modified images **/
-    // imgData origImg = loadImage(argv[1]);
-    imgData origImg = cv::imread(argv[1]);
-    // imgData cpuImg(new byte[origImg.width*origImg.height], origImg.width, origImg.height);
-    // imgData ompImg(new byte[origImg.width*origImg.height], origImg.width, origImg.height);
+    imgData origImg = loadImage(argv[1]);
+    // imgData origImg = cv::imread(argv[1]);
+    
     imgData gpuImg(new byte[origImg.width*origImg.height], origImg.width, origImg.height);
     
-    /** make sure all our newly allocated data is set to 0 **/
-    // memset(cpuImg.pixels, 0, (origImg.width*origImg.height));
-    // memset(ompImg.pixels, 0, (origImg.width*origImg.height));
-
     /** We first run the sobel filter on just the CPU using only 1 thread **/
-    auto c = std::chrono::system_clock::now();
-    // sobel_cpu(origImg.pixels, cpuImg.pixels, origImg.width, origImg.height);
-    // std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;
-
-    /** Next, we use OpenMP to parallelize it **/
-    // c = std::chrono::system_clock::now();
-    // sobel_omp(origImg.pixels, ompImg.pixels, origImg.width, origImg.height);
-    // std::chrono::duration<double> time_omp = std::chrono::system_clock::now() - c;
-
+    // auto c = std::chrono::system_clock::now();
+    
     /** Finally, we use the GPU to parallelize it further **/
     /** Allocate space in the GPU for our original img, new img, and dimensions **/
     byte *gpu_orig, *gpu_sobel;
@@ -150,7 +138,6 @@ int main(int argc, char*argv[]) {
     dim3 numBlocks(ceil(origImg.width/GRIDVAL), ceil(origImg.height/GRIDVAL), 1);
 
     /** Run the sobel filter using the CPU **/
-    // c = std::chrono::system_clock::now();
     sobel_gpu<<<numBlocks, threadsPerBlock>>>(gpu_orig, gpu_sobel, origImg.width, origImg.height);
     cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
     if ( cudaerror != cudaSuccess ) fprintf( stderr, "Cuda failed to synchronize: %s\n", cudaGetErrorName( cudaerror ) ); // if error, output error
@@ -160,19 +147,12 @@ int main(int argc, char*argv[]) {
 
     /** Output runtimes of each method of sobel filtering **/
     printf("\nProcessing %s: %d rows x %d columns\n", argv[1], origImg.height, origImg.width);
-    // printf("CPU execution time    = %*.1f msec\n", 5, 1000*time_cpu.count());
-    // printf("OpenMP execution time = %*.1f msec\n", 5, 1000*time_omp.count());
     printf("CUDA execution time   = %*.1f msec\n", 5, 1000*time_gpu.count());
-    // printf("\nCPU->OMP speedup:%*.1f X", 12, (1000*time_cpu.count())/(1000*time_omp.count()));
-    // printf("\nOMP->GPU speedup:%*.1f X", 12, (1000*time_omp.count())/(1000*time_gpu.count()));
-    // printf("\nCPU->GPU speedup:%*.1f X", 12, (1000*time_cpu.count())/(1000*time_gpu.count()));
     printf("\n");
 
     /** Output the images of each sobel filter with an appropriate string appended to the original image name **/
     writeImage(argv[1], "gpu", gpuImg);
-    // writeImage(argv[1], "cpu", cpuImg);
-    // writeImage(argv[1], "omp", ompImg);
-
+    
     /** Free any memory leftover.. gpuImig, cpuImg, and ompImg get their pixels free'd while writing **/
     cudaFree(gpu_orig); cudaFree(gpu_sobel);
     return 0;
