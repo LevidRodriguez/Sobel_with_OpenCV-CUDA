@@ -107,7 +107,7 @@ int main(int argc, char*argv[]) {
     std::cout << timeBuffer << std::endl;
     // printf("%s", timeBuffer);
     // printf("CPU: %d hardware threads\n", std::thread::hardware_concurrency());
-    std::cout << "GPGPU: " << devProp.name << " CUDA "<< devProp.major << devProp.minor << devProp.totalGlobalMem / 1048576 << 
+    std::cout << "GPGPU: " << devProp.name << ", CUDA "<< devProp.major/10 << ", "<< devProp.minor << devProp.totalGlobalMem / 1048576 << 
                 " Mbytes global memory, "<< cores << " CUDA cores\n" <<std::endl;
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
 
@@ -117,8 +117,8 @@ int main(int argc, char*argv[]) {
     
     imgData gpuImg(new byte[origImg.width*origImg.height], origImg.width, origImg.height);
     
-    /** We first run the sobel filter on just the CPU using only 1 thread **/
-    auto c = std::chrono::system_clock::now();
+    // /** We first run the sobel filter on just the CPU using only 1 thread **/
+    // auto c = std::chrono::system_clock::now();
     
     /** Finally, we use the GPU to parallelize it further **/
     /** Allocate space in the GPU for our original img, new img, and dimensions **/
@@ -133,6 +133,8 @@ int main(int argc, char*argv[]) {
     dim3 threadsPerBlock(GRIDVAL, GRIDVAL, 1);
     dim3 numBlocks(ceil(origImg.width/GRIDVAL), ceil(origImg.height/GRIDVAL), 1);
 
+    /** We first run the sobel filter on just the CPU using only 1 thread **/
+    auto c = std::chrono::system_clock::now();
     /** Run the sobel filter using the CPU **/
     sobel_gpu<<<numBlocks, threadsPerBlock>>>(gpu_orig, gpu_sobel, origImg.width, origImg.height);
     cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
