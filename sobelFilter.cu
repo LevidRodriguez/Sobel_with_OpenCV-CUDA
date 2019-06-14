@@ -107,8 +107,8 @@ int main(int argc, char*argv[]) {
     std::cout << timeBuffer << std::endl;
     // printf("%s", timeBuffer);
     // printf("CPU: %d hardware threads\n", std::thread::hardware_concurrency());
-    std::cout << "GPGPU: " << devProp.name << "CUDA "<< devProp.major << devProp.minor << devProp.totalGlobalMem / 1048576 << 
-                " Mbytes global memory, %d CUDA cores\n" << cores <<std::endl;
+    std::cout << "GPGPU: " << devProp.name << " CUDA "<< devProp.major << devProp.minor << devProp.totalGlobalMem / 1048576 << 
+                " Mbytes global memory, "<< cores << " CUDA cores\n" <<std::endl;
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
 
     /** Load our img and allocate space for our modified images **/
@@ -142,7 +142,7 @@ int main(int argc, char*argv[]) {
     cudaMemcpy(gpuImg.pixels, gpu_sobel, (origImg.width*origImg.height), cudaMemcpyDeviceToHost);
 
     /** Output runtimes of each method of sobel filtering **/
-    std::cout << "\nProcessing "<< argv[1] << ": "<<origImg.height<<" rows x "<<origImg.width << "columns" << std::endl;
+    std::cout << "\nProcessing "<< argv[1] << ": "<<origImg.height<<" rows x "<<origImg.width << " columns" << std::endl;
     // printf(, ,  );
     std::cout << "CUDA execution time   = " << 1000*time_gpu.count() <<"msec"<<std::endl;
     // printf(, 5, );
