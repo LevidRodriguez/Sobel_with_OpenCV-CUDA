@@ -113,6 +113,8 @@ int main(int argc, char*argv[]) {
     printf("GPGPU: %s, CUDA %d.%d, %zd Mbytes global memory, %d CUDA cores\n",
     devProp.name, devProp.major, devProp.minor, devProp.totalGlobalMem / 1048576, cores);
 
+    std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
+
     /** Load our img and allocate space for our modified images **/
     imgData origImg = loadImage(argv[1]);
     // imgData cpuImg(new byte[origImg.width*origImg.height], origImg.width, origImg.height);
