@@ -42,7 +42,8 @@
  *              uint height : the height of the image
  * 
  ***********************************************************************************************/
-__global__ void sobel_gpu(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height) {
+// __global__ void sobel_gpu(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height) {
+__global__ void sobel_gpu(cv::Mat* orig, cv::Mat* cpu, const unsigned int width, const unsigned int height) {
     int x = threadIdx.x + blockIdx.x * blockDim.x;
     int y = threadIdx.y + blockIdx.y * blockDim.y;
     float dx, dy;
