@@ -20,6 +20,11 @@
 #include <iostream>
 #include <math.h>
 #include "imageLoader.cpp"
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/stitching.hpp>
+#include <opencv2/core/utility.hpp>
+
 
 #define GRIDVAL 20.0 
 
