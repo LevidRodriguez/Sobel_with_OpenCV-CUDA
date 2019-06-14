@@ -142,7 +142,7 @@ int main(int argc, char*argv[]) {
     cudaMemcpy(gpuImg.pixels, gpu_sobel, (origImg.width*origImg.height), cudaMemcpyDeviceToHost);
 
     /** Output runtimes of each method of sobel filtering **/
-    std::cout << "\nProcessing "<< argv[1] << ": "<<origImg.height,<<" rows x "<<origImg.width << "columns" << std::endl;
+    std::cout << "\nProcessing "<< argv[1] << ": "<<origImg.height<<" rows x "<<origImg.width << "columns" << std::endl;
     // printf(, ,  );
     std::cout << "CUDA execution time   = " << 1000*time_gpu.count() <<"msec"<<std::endl;
     // printf(, 5, );
