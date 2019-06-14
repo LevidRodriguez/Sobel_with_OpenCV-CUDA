@@ -107,7 +107,7 @@ int main(int argc, char*argv[]) {
     std::cout << timeBuffer << std::endl;
     // printf("%s", timeBuffer);
     // printf("CPU: %d hardware threads\n", std::thread::hardware_concurrency());
-    std::cout << "GPGPU: " << devProp.name << ", CUDA "<< devProp.major/10 << ", "<< devProp.minor << devProp.totalGlobalMem / 1048576 << 
+    std::cout << "GPGPU: " << devProp.name << ", CUDA "<< devProp.major << "."<< devProp.minor <<", "<< devProp.totalGlobalMem / 1048576 << 
                 " Mbytes global memory, "<< cores << " CUDA cores\n" <<std::endl;
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
 
