@@ -65,6 +65,7 @@ int main(int argc, char * argv[]){
     unsigned char *gpu_orig, *gpu_sobel, *cpu_sobel;
     auto c = std::chrono::system_clock::now();
     sobel_cpu(origImg.data, cpu_sobel, origImg.cols, origImg.rows);
+    std::cout<<"RETURN FROM sobel_cpu function: " << std::endl;
     std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
     // cv::imwrite("sobel_cpu.png", sobel_cpu);
 
