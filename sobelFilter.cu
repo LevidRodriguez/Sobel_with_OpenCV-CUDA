@@ -10,7 +10,7 @@
 #include <opencv2/core/utility.hpp>
 
 #define GridSize 20.0 
-void sobel_cpu(unsigned char* orig, unsigned char* cpu, const unsigned int width, const unsigned int height);
+// void sobel_cpu(unsigned char* orig, unsigned char* cpu, const unsigned int width, const unsigned int height);
 
 __global__ void sobelFilterGPU(unsigned char* orig, unsigned char* cpu, const unsigned int width, const unsigned int height){
     int x = threadIdx.x + blockIdx.x * blockDim.x;
@@ -64,12 +64,15 @@ int main(int argc, char * argv[]){
     
     unsigned char *gpu_orig, *gpu_sobel, *cpu_sobel;
     auto c = std::chrono::system_clock::now();
+    
+    /******************************************START CPU******************************************************/
     std::cout<<"To sobel_cpu function: " << std::endl;
-    sobel_cpu(origImg.data, cpu_sobel, origImg.cols, origImg.rows);
+    // sobel_cpu(origImg.data, cpu_sobel, origImg.cols, origImg.rows);
     std::cout<<"RETURN FROM sobel_cpu function: " << std::endl;
     std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
     // cv::imwrite("sobel_cpu.png", sobel_cpu);
-
+    /******************************************END CPU******************************************************/
+    
     // Allocate memory for the images in GPU memory 
     cudaMalloc( (void**)&gpu_orig, (origImg.cols * origImg.rows));
     cudaMalloc( (void**)&gpu_sobel, (origImg.cols * origImg.rows));
@@ -102,23 +105,4 @@ int main(int argc, char * argv[]){
     cudaFree(gpu_orig); cudaFree(gpu_sobel);
 
     return 0;
-}
-
-void sobel_cpu(unsigned char* orig, unsigned char* cpu, const unsigned int width, const unsigned int height) {
-    std::cout << width << ", "<<height<<std::endl;
-    for(int y = 0; y < height; y++) {
-        std::cout<<" primer for"<<std::endl;
-        for(int x = 0; x < width; x++) {
-            std::cout<<" segundo for"<<std::endl;
-            int dx = (-1*orig[(y-1)*width + (x-1)]) + (-2*orig[y*width+(x-1)]) + (-1*orig[(y+1)*width+(x-1)]) +
-                     (orig[(y-1)*width + (x+1)]) + (2*orig[y*width+(x+1)]) + (orig[(y+1)*width+(x+1)]);
-            std::cout<<" primer for"<<std::endl;
-            int dy = (orig[(y-1)*width + (x-1)]) + (2*orig[(y-1)*width+x]) + (orig[(y-1)*width+(x+1)]) +
-                (-1*orig[(y+1)*width + (x-1)]) + (-2*orig[(y+1)*width+x]) + (-1*orig[(y+1)*width+(x+1)]);
-            std::cout<< "dx, dy: "<< dx<< ", "<< dy <<std::endl;
-            std::cout<<"[y*width + x]:"<< y*width + x<<std::endl;
-            cpu[y*width + x] = sqrt((dx*dx)+(dy*dy));
-            std::cout<<cpu[y*width + x]<<" "<<std::endl;
-        }
-    }
 }
