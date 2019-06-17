@@ -150,7 +150,7 @@ int main(int argc, char*argv[]) {
     std::chrono::duration<double> time_gpu = std::chrono::system_clock::now() - c;
     /** Copy data back to CPU from GPU **/
     // cudaMemcpy(gpuImg.pixels, gpu_sobel, (origImg.width*origImg.height), cudaMemcpyDeviceToHost);
-    cudaMemcpy(gpuImg.pixel, gpu_sobel, (origImg.cols*origImg.rows), cudaMemcpyDeviceToHost);
+    cudaMemcpy(gpuImg.pixels, gpu_sobel, (origImg.cols*origImg.rows), cudaMemcpyDeviceToHost);
 
     /** Output runtimes of each method of sobel filtering **/
     // std::cout << "\nProcessing "<< argv[1] << ": "<<origImg.height<<" rows x "<<origImg.width << " columns" << std::endl;
