@@ -79,7 +79,7 @@ int main(int argc, char * argv[]){
     cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
     // if error, output error
     if ( cudaerror != cudaSuccess ) 
-        srd::cout <<  "Cuda failed to synchronize: " << cudaGetErrorName( cudaerror ) <<std::endl;
+        std::cout <<  "Cuda failed to synchronize: " << cudaGetErrorName( cudaerror ) <<std::endl;
     
     std::chrono::duration<double> time_gpu = std::chrono::system_clock::now() - c;
     // Copia los datos al CPU desde la GPU, del device al host
