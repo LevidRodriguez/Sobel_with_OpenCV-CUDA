@@ -35,10 +35,6 @@ int main(int argc, char * argv[]){
         std::cout << "Usage: " << argv[0] << " [image.png]"<< std::endl;
         return 1;
     }
-
-    
-
-
     cudaDeviceProp devProp;
     cudaGetDeviceProperties(&devProp, 0);
     int cores = devProp.multiProcessorCount;
