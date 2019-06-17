@@ -9,6 +9,22 @@
 #include <opencv2/stitching.hpp>
 #include <opencv2/core/utility.hpp>
 
+__global__ void sobelFilterGPU(cv::Mat *srcImg, cv::Mat *desImg, const unsigned int cols, const unsigned int rows){
+    int x = threadIdx.x + blockIdx.x * blockDim.x;
+    int y = threadIdx.y + blockIdx.y * blockDim.y;
+    float dx, dy;
+
+    if( x > 0 && y > 0 && x < cols-1 && y < rows-1) {
+        dx = (-1* srcImg[(y-1)*cols + (x-1)]) + (-2*srcImg[y*cols+(x-1)]) + (-1*srcImg[(y+1)*cols+(x-1)]) +
+             (    srcImg[(y-1)*cols + (x+1)]) + ( 2*srcImg[y*cols+(x+1)]) + (   srcImg[(y+1)*cols+(x+1)]);
+             
+        dy = (    srcImg[(y-1)*cols + (x-1)]) + ( 2*srcImg[(y-1)*cols+x]) + (   srcImg[(y-1)*cols+(x+1)]) +
+             (-1* srcImg[(y+1)*cols + (x-1)]) + (-2*srcImg[(y+1)*cols+x]) + (-1*srcImg[(y+1)*cols+(x+1)]);
+        
+        desImg[y*cols + x] = sqrt( (dx*dx) + (dy*dy) );
+    }
+
+}
 
 #define GRIDVAL 20.0 
 
@@ -42,5 +58,15 @@ int main(int argc, char * argv[]){
     std::cout << "GPGPU: " << devProp.name << ", CUDA "<< devProp.major << "."<< devProp.minor <<", "<< devProp.totalGlobalMem / 1048576 << 
                 " Mbytes global memory, "<< cores << " CUDA cores\n" <<std::endl;
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
+
+    cv::Mat origImg = cv::imread(argv[1]);
+    cv::Mat * destImg;
+
+    const size_t size = sizeof(origImg);
+    cudaMalloc((void **)&destImg, size);
+    cudaMemcpy(destImg, &origImg, size,cudaMemcpyHostToDevice);
+
+    
+
     return 0;
 }
