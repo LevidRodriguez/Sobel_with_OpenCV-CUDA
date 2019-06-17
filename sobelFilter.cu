@@ -63,7 +63,7 @@ int main(int argc, char * argv[]){
     cv::cvtColor(origImg, origImg, cv::COLOR_RGB2GRAY);
     unsigned char *gpu_orig, *gpu_sobel, *cpu_sobel;
     auto c = std::chrono::system_clock::now();
-    sobel_cpu(origImg.data, cpu_sobel, origImg.cols, origImg.cols);
+    sobel_cpu(origImg.data, cpu_sobel, origImg.cols, origImg.rows);
     std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
 
     // Allocate memory for the images in GPU memory 
