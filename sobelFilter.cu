@@ -104,7 +104,7 @@ int main(int argc, char * argv[]){
     return 0;
 }
 
-void sobel_cpu(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height) {
+void sobel_cpu(unsigned char* orig, unsigned char* cpu, const unsigned int width, const unsigned int height) {
     std::cout << width << ", "<<height<<std::endl;
     for(int y = 1; y < height-1; y++) {
         for(int x = 1; x < width-1; x++) {
