@@ -116,6 +116,7 @@ void sobel_cpu(unsigned char* orig, unsigned char* cpu, const unsigned int width
             int dy = (orig[(y-1)*width + (x-1)]) + (2*orig[(y-1)*width+x]) + (orig[(y-1)*width+(x+1)]) +
                 (-1*orig[(y+1)*width + (x-1)]) + (-2*orig[(y+1)*width+x]) + (-1*orig[(y+1)*width+(x+1)]);
             std::cout<< "dx, dy: "<< dx<< ", "<< dy <<std::endl;
+            std::cout<<"[y*width + x]:"<< y*width + x<<std::endl;
             cpu[y*width + x] = sqrt((dx*dx)+(dy*dy));
             std::cout<<cpu[y*width + x]<<" "<<std::endl;
         }
