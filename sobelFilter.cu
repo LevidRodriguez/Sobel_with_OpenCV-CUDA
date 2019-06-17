@@ -3,13 +3,14 @@
 #include <time.h>
 #include <iostream>
 #include <math.h>
-#include "imageLoader.cpp"
+// #include "imageLoader.cpp"
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/stitching.hpp>
 #include <opencv2/core/utility.hpp>
 
-#define GRIDVAL 20.0 
+#define GridSize 20.0 
+void sobel_cpu(unsigned char* orig, unsigned char* cpu, const unsigned int width, const unsigned int height);
 
 __global__ void sobelFilterGPU(unsigned char* orig, unsigned char* cpu, const unsigned int width, const unsigned int height){
     int x = threadIdx.x + blockIdx.x * blockDim.x;
@@ -24,10 +25,7 @@ __global__ void sobelFilterGPU(unsigned char* orig, unsigned char* cpu, const un
         
         cpu[y*width + x] = sqrt( (dx*dx) + (dy*dy) );
     }
-
 }
-
-#define GRIDVAL 20.0 
 
 int main(int argc, char * argv[]){
     if(argc != 2){
@@ -35,6 +33,7 @@ int main(int argc, char * argv[]){
         std::cout << "Usage: " << argv[0] << " [image.png]"<< std::endl;
         return 1;
     }
+    // Verify GPU, CUDA and OpenCV version
     cudaDeviceProp devProp;
     cudaGetDeviceProperties(&devProp, 0);
     int cores = devProp.multiProcessorCount;
@@ -59,36 +58,52 @@ int main(int argc, char * argv[]){
     std::cout << "GPGPU: " << devProp.name << ", CUDA "<< devProp.major << "."<< devProp.minor <<", "<< devProp.totalGlobalMem / 1048576 << 
                 " Mbytes global memory, "<< cores << " CUDA cores\n" <<std::endl;
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
-
+    // Load Image
     cv::Mat origImg = cv::imread(argv[1]);
     cv::cvtColor(origImg, origImg, cv::COLOR_RGB2GRAY);
     
+    auto c = std::chrono::system_clock::now();
+    
+    // Allocate memory for the images in GPU memory 
     unsigned char *gpu_orig, *gpu_sobel;
     cudaMalloc( (void**)&gpu_orig, (origImg.cols * origImg.rows));
     cudaMalloc( (void**)&gpu_sobel, (origImg.cols * origImg.rows));
-
+    // Transfiera del host al device y configura la matriz resultante a 0s
     cudaMemcpy(gpu_orig, origImg.data, (origImg.cols*origImg.rows), cudaMemcpyHostToDevice);
     cudaMemset(gpu_sobel, 0, (origImg.cols*origImg.rows));
-
-    dim3 threadsPerBlock(GRIDVAL, GRIDVAL, 1);
-    dim3 numBlocks(ceil(origImg.cols/GRIDVAL), ceil(origImg.rows/GRIDVAL), 1);
-    
-    auto c = std::chrono::system_clock::now();
-
+    // configura los dim3 para que gpu los use como argumentos, hilos por bloque y número de bloques
+    dim3 threadsPerBlock(GridSize, GridSize, 1);
+    dim3 numBlocks(ceil(origImg.cols/GridSize), ceil(origImg.rows/GridSize), 1);
+    // Ejecutar el filtro sobel utilizando la CPU.
     sobelFilterGPU<<<numBlocks, threadsPerBlock>>>(gpu_orig, gpu_sobel, origImg.cols, origImg.rows);
-
     cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
-    if ( cudaerror != cudaSuccess ) fprintf( stderr, "Cuda failed to synchronize: %s\n", cudaGetErrorName( cudaerror ) ); // if error, output error
+    // if error, output error
+    if ( cudaerror != cudaSuccess ) 
+        srd::cout <<  "Cuda failed to synchronize: " << cudaGetErrorName( cudaerror ) <<std::endl;
+    
     std::chrono::duration<double> time_gpu = std::chrono::system_clock::now() - c;
-
+    // Copia los datos al CPU desde la GPU, del device al host
     cudaMemcpy(origImg. data, gpu_sobel, (origImg.cols*origImg.rows), cudaMemcpyDeviceToHost);
 
     /** Output runtimes of each method of sobel filtering **/
     std::cout << "\nProcessing "<< argv[1] << ": "<<origImg.rows<<" rows x "<<origImg.cols << " columns" << std::endl;
     std::cout << "CUDA execution time   = " << 1000*time_gpu.count() <<" msec"<<std::endl;
 
+    // Save results
     cv::imwrite("outImg.png",origImg);    
     cudaFree(gpu_orig); cudaFree(gpu_sobel);
 
     return 0;
 }
+
+void sobel_cpu(unsigned char* orig, unsigned char* cpu,, const unsigned int width, const unsigned int height) {
+    for(int y = 1; y < height-1; y++) {
+        for(int x = 1; x < width-1; x++) {
+            int dx = (-1*orig[(y-1)*width + (x-1)]) + (-2*orig[y*width+(x-1)]) + (-1*orig[(y+1)*width+(x-1)]) +
+                     (orig[(y-1)*width + (x+1)]) + (2*orig[y*width+(x+1)]) + (orig[(y+1)*width+(x+1)]);
+            int dy = (orig[(y-1)*width + (x-1)]) + (2*orig[(y-1)*width+x]) + (orig[(y-1)*width+(x+1)]) +
+                (-1*orig[(y+1)*width + (x-1)]) + (-2*orig[(y+1)*width+x]) + (-1*orig[(y+1)*width+(x+1)]);
+                cpu[y*width + x] = sqrt((dx*dx)+(dy*dy));
+            }
+        }
+    }
