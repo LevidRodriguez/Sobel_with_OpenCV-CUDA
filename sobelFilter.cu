@@ -9,19 +9,18 @@
 #include <opencv2/stitching.hpp>
 #include <opencv2/core/utility.hpp>
 
-__global__ void sobelFilterGPU(cv::Mat *srcImg, cv::Mat *desImg, const unsigned int cols, const unsigned int rows){
+__global__ void sobelFilterGPU(unsigned char* orig, unsigned char* cpu, const unsigned int width, const unsigned int height){
     int x = threadIdx.x + blockIdx.x * blockDim.x;
     int y = threadIdx.y + blockIdx.y * blockDim.y;
     float dx, dy;
-
-    if( x > 0 && y > 0 && x < cols-1 && y < rows-1) {
-        dx = (-1* srcImg->data[(y-1)*cols + (x-1)]) + (-2*srcImg->data[y*cols+(x-1)]) + (-1*srcImg->data[(y+1)*cols+(x-1)]) +
-             (    srcImg->data[(y-1)*cols + (x+1)]) + ( 2*srcImg->data[y*cols+(x+1)]) + (   srcImg->data[(y+1)*cols+(x+1)]);
+    if( x > 0 && y > 0 && x < width-1 && y < height-1) {
+        dx = (-1* orig[(y-1)*width + (x-1)]) + (-2*orig[y*width+(x-1)]) + (-1*orig[(y+1)*width+(x-1)]) +
+             (    orig[(y-1)*width + (x+1)]) + ( 2*orig[y*width+(x+1)]) + (   orig[(y+1)*width+(x+1)]);
              
-        dy = (    srcImg->data[(y-1)*cols + (x-1)]) + ( 2*srcImg->data[(y-1)*cols+x]) + (   srcImg->data[(y-1)*cols+(x+1)]) +
-             (-1* srcImg->data[(y+1)*cols + (x-1)]) + (-2*srcImg->data[(y+1)*cols+x]) + (-1*srcImg->data[(y+1)*cols+(x+1)]);
+        dy = (    orig[(y-1)*width + (x-1)]) + ( 2*orig[(y-1)*width+x]) + (   orig[(y-1)*width+(x+1)]) +
+             (-1* orig[(y+1)*width + (x-1)]) + (-2*orig[(y+1)*width+x]) + (-1*orig[(y+1)*width+(x+1)]);
         
-        desImg->data[y*cols + x] = sqrt( (dx*dx) + (dy*dy) );
+        cpu[y*width + x] = sqrt( (dx*dx) + (dy*dy) );
     }
 
 }
@@ -34,6 +33,10 @@ int main(int argc, char * argv[]){
         std::cout << "Usage: " << argv[0] << " [image.png]"<< std::endl;
         return 1;
     }
+
+    unsigned char *srcImg_dev, *outImg_dev; 
+
+
     cudaDeviceProp devProp;
     cudaGetDeviceProperties(&devProp, 0);
     int cores = devProp.multiProcessorCount;
@@ -59,12 +62,16 @@ int main(int argc, char * argv[]){
                 " Mbytes global memory, "<< cores << " CUDA cores\n" <<std::endl;
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
 
-    cv::Mat origImg = cv::imread(argv[1]);
-    cv::Mat * destImg;
-
+    cv::Mat inImg = cv::imread(argv[1]);
+    cv::Mat outImg ;
+    cv::cvtColor(inImg, outImg, cv::COLOR_RGB2GRAY);
+    cv:imwrite("outImg.png",outImg);
+    
     const size_t size = sizeof(origImg);
-    cudaMalloc((void **)&destImg, size);
+    cudaMalloc((void **)&devImg, size);
     cudaMemcpy(destImg, &origImg, size,cudaMemcpyHostToDevice);
+
+
 
 
 
