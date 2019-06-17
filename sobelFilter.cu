@@ -67,9 +67,9 @@ int main(int argc, char * argv[]){
     cv::cvtColor(inImg, outImg, cv::COLOR_RGB2GRAY);
     cv:imwrite("outImg.png",outImg);
     
-    const size_t size = sizeof(origImg);
-    cudaMalloc((void **)&devImg, size);
-    cudaMemcpy(destImg, &origImg, size,cudaMemcpyHostToDevice);
+    // const size_t size = sizeof(origImg);
+    // cudaMalloc((void **)&devImg, size);
+    // cudaMemcpy(destImg, &origImg, size,cudaMemcpyHostToDevice);
 
 
 
