@@ -60,11 +60,13 @@ int main(int argc, char * argv[]){
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
     // Load Image
     cv::Mat origImg = cv::imread(argv[1]);
+    cv::Mat sobel_cpu; 
     cv::cvtColor(origImg, origImg, cv::COLOR_RGB2GRAY);
-    unsigned char *gpu_orig, *gpu_sobel, *cpu_sobel;
+    unsigned char *gpu_orig, *gpu_sobel;
     auto c = std::chrono::system_clock::now();
-    // sobel_cpu(origImg.data, cpu_sobel, origImg.cols, origImg.rows);
+    sobel_cpu(origImg.data, cpu_sobel.data, origImg.cols, origImg.rows);
     std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
+    cv::imwrite("sobel_cpu.png", sobel_cpu);
 
     // Allocate memory for the images in GPU memory 
     cudaMalloc( (void**)&gpu_orig, (origImg.cols * origImg.rows));
