@@ -64,7 +64,7 @@ int main(int argc, char * argv[]){
     cv::cvtColor(origImg, origImg, cv::COLOR_RGB2GRAY);
     unsigned char *gpu_orig, *gpu_sobel;
     auto c = std::chrono::system_clock::now();
-    sobel_cpu(origImg.data, cpu_sobel.data, origImg.cols, origImg.rows);
+    sobel_cpu(origImg.data, sobel_cpu.data, origImg.cols, origImg.rows);
     std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
     cv::imwrite("sobel_cpu.png", sobel_cpu);
 
