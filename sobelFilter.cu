@@ -114,7 +114,7 @@ int main(int argc, char*argv[]) {
 
     /** Load our img and allocate space for our modified images **/
     // imgData origImg = loadImage(argv[1]);
-    imgData origImg = cv::imread(argv[1]);
+    cv::Mat origImg = cv::imread(argv[1]);
     
     // imgData gpuImg(new byte[origImg.width*origImg.height], origImg.width, origImg.height);
     imgData gpuImg(new byte[origImg.cols*origImg.rows], origImg.cols, origImg.rows);
