@@ -15,8 +15,8 @@ __global__ void sobelFilterGPU(cv::Mat *srcImg, cv::Mat *desImg, const unsigned 
     float dx, dy;
 
     if( x > 0 && y > 0 && x < cols-1 && y < rows-1) {
-        dx = (-1* srcImg[(y-1)*cols + (x-1)]) + (-2*srcImg[y*cols+(x-1)]) + (-1*srcImg[(y+1)*cols+(x-1)]) +
-             (    srcImg[(y-1)*cols + (x+1)]) + ( 2*srcImg[y*cols+(x+1)]) + (   srcImg[(y+1)*cols+(x+1)]);
+        dx = (-1* srcImg->data[(y-1)*cols + (x-1)]) + (-2*srcImg->data[y*cols+(x-1)]) + (-1*srcImg->data[(y+1)*cols+(x-1)]) +
+             (    srcImg->data[(y-1)*cols + (x+1)]) + ( 2*srcImg->data[y*cols+(x+1)]) + (   srcImg->data[(y+1)*cols+(x+1)]);
              
         dy = (    srcImg[(y-1)*cols + (x-1)]) + ( 2*srcImg[(y-1)*cols+x]) + (   srcImg[(y-1)*cols+(x+1)]) +
              (-1* srcImg[(y+1)*cols + (x-1)]) + (-2*srcImg[(y+1)*cols+x]) + (-1*srcImg[(y+1)*cols+(x+1)]);
@@ -66,7 +66,7 @@ int main(int argc, char * argv[]){
     cudaMalloc((void **)&destImg, size);
     cudaMemcpy(destImg, &origImg, size,cudaMemcpyHostToDevice);
 
-    
+
 
     return 0;
 }
