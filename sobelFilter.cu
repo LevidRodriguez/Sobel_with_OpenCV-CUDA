@@ -106,9 +106,9 @@ int main(int argc, char * argv[]){
 
 void sobel_cpu(unsigned char* orig, unsigned char* cpu, const unsigned int width, const unsigned int height) {
     std::cout << width << ", "<<height<<std::endl;
-    for(int y = 1; y < height-1; y++) {
+    for(int y = 0; y < height; y++) {
         std::cout<<" primer for"<<std::endl;
-        for(int x = 1; x < width-1; x++) {
+        for(int x = 0; x < width; x++) {
             std::cout<<" segundo for"<<std::endl;
             int dx = (-1*orig[(y-1)*width + (x-1)]) + (-2*orig[y*width+(x-1)]) + (-1*orig[(y+1)*width+(x-1)]) +
                      (orig[(y-1)*width + (x+1)]) + (2*orig[y*width+(x+1)]) + (orig[(y+1)*width+(x+1)]);
