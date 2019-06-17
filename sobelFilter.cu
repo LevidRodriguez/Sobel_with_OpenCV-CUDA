@@ -79,7 +79,7 @@ int main(int argc, char * argv[]){
     
     auto c = std::chrono::system_clock::now();
 
-    sobelFilterGPU<<<numBlocks, threadsPerBlock>>>(gpu_orig, gpu_sobel, origImg.cols, origImg.rows)
+    sobelFilterGPU<<<numBlocks, threadsPerBlock>>>(gpu_orig, gpu_sobel, origImg.cols, origImg.rows);
 
     cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
     if ( cudaerror != cudaSuccess ) fprintf( stderr, "Cuda failed to synchronize: %s\n", cudaGetErrorName( cudaerror ) ); // if error, output error
@@ -89,19 +89,10 @@ int main(int argc, char * argv[]){
 
     /** Output runtimes of each method of sobel filtering **/
     std::cout << "\nProcessing "<< argv[1] << ": "<<origImg.height<<" rows x "<<origImg.width << " columns" << std::endl;
-    // printf(, ,  );
     std::cout << "CUDA execution time   = " << 1000*time_gpu.count() <<" msec"<<std::endl;
 
     cv:imwrite("outImg.png",origImg);    
     cudaFree(gpu_orig); cudaFree(gpu_sobel);
-
-    // const size_t size = sizeof(origImg);
-    // cudaMalloc((void **)&devImg, size);
-    // cudaMemcpy(destImg, &origImg, size,cudaMemcpyHostToDevice);
-
-
-
-
 
     return 0;
 }
