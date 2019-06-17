@@ -123,28 +123,38 @@ int main(int argc, char*argv[]) {
     /** Allocate space in the GPU for our original img, new img, and dimensions **/
     // byte *gpu_orig, *gpu_sobel;
     float *gpu_orig, *gpu_sobel;
-    cudaMalloc( (void**)&gpu_orig, (origImg.width * origImg.height));
-    cudaMalloc( (void**)&gpu_sobel, (origImg.width * origImg.height));
+    // cudaMalloc( (void**)&gpu_orig, (origImg.width * origImg.height));
+    // cudaMalloc( (void**)&gpu_sobel, (origImg.width * origImg.height));
+    cudaMalloc( (void**)&gpu_orig, (origImg.cols * origImg.rows));
+    cudaMalloc( (void**)&gpu_sobel, (origImg.cols * origImg.rows));
+
     /** Transfer over the memory from host to device and memset the sobel array to 0s **/
-    cudaMemcpy(gpu_orig, origImg.pixels, (origImg.width*origImg.height), cudaMemcpyHostToDevice);
-    cudaMemset(gpu_sobel, 0, (origImg.width*origImg.height));
+    // cudaMemcpy(gpu_orig, origImg.pixels, (origImg.width*origImg.height), cudaMemcpyHostToDevice);
+    // cudaMemset(gpu_sobel, 0, (origImg.width*origImg.height));
+
+    cudaMemcpy(gpu_orig, origImg.data, (origImg.cols*origImg.rows), cudaMemcpyHostToDevice);
+    cudaMemset(gpu_sobel, 0, (origImg.cols*origImg.rows));
    
     /** set up the dim3's for the gpu to use as arguments (threads per block & num of blocks)**/
     dim3 threadsPerBlock(GRIDVAL, GRIDVAL, 1);
-    dim3 numBlocks(ceil(origImg.width/GRIDVAL), ceil(origImg.height/GRIDVAL), 1);
+    // dim3 numBlocks(ceil(origImg.width/GRIDVAL), ceil(origImg.height/GRIDVAL), 1);
+    dim3 numBlocks(ceil(origImg.cols/GRIDVAL), ceil(origImg.rows/GRIDVAL), 1);
 
     /** We first run the sobel filter on just the CPU using only 1 thread **/
     auto c = std::chrono::system_clock::now();
     /** Run the sobel filter using the CPU **/
-    sobel_gpu<<<numBlocks, threadsPerBlock>>>(gpu_orig, gpu_sobel, origImg.width, origImg.height);
+    // sobel_gpu<<<numBlocks, threadsPerBlock>>>(gpu_orig, gpu_sobel, origImg.width, origImg.height);
+    sobel_gpu<<<numBlocks, threadsPerBlock>>>(gpu_orig, gpu_sobel, origImg.cols, origImg.rows);
     cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
     if ( cudaerror != cudaSuccess ) fprintf( stderr, "Cuda failed to synchronize: %s\n", cudaGetErrorName( cudaerror ) ); // if error, output error
     std::chrono::duration<double> time_gpu = std::chrono::system_clock::now() - c;
     /** Copy data back to CPU from GPU **/
-    cudaMemcpy(gpuImg.pixels, gpu_sobel, (origImg.width*origImg.height), cudaMemcpyDeviceToHost);
+    // cudaMemcpy(gpuImg.pixels, gpu_sobel, (origImg.width*origImg.height), cudaMemcpyDeviceToHost);
+    cudaMemcpy(gpuImg.data, gpu_sobel, (origImg.cols*origImg.rows), cudaMemcpyDeviceToHost);
 
     /** Output runtimes of each method of sobel filtering **/
-    std::cout << "\nProcessing "<< argv[1] << ": "<<origImg.height<<" rows x "<<origImg.width << " columns" << std::endl;
+    // std::cout << "\nProcessing "<< argv[1] << ": "<<origImg.height<<" rows x "<<origImg.width << " columns" << std::endl;
+    std::cout << "\nProcessing "<< argv[1] << ": "<<origImg.rows<<" rows x "<<origImg.cols << " columns" << std::endl;
     // printf(, ,  );
     std::cout << "CUDA execution time   = " << 1000*time_gpu.count() <<" msec"<<std::endl;
     // printf(, 5, );
