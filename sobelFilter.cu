@@ -103,6 +103,7 @@ int main(int argc, char * argv[]){
 }
 
 void sobel_cpu(unsigned char* orig, unsigned char* cpu,const unsigned int width, const unsigned int height) {
+    std::cout<<"In sobel_cpu function: " << std::endl;
     for(int y = 1; y < height-1; y++) {
         for(int x = 1; x < width-1; x++) {
             int dx = (-1*orig[(y-1)*width + (x-1)]) + (-2*orig[y*width+(x-1)]) + (-1*orig[(y+1)*width+(x-1)]) +
