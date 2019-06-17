@@ -117,7 +117,7 @@ int main(int argc, char*argv[]) {
     cv::Mat origImg2 = cv::imread(argv[1]);
 
     std::cout <<"origImg: "<< origImg.pixels<<std::endl;
-    std::cout << "origImg2: "<< origImg2.data<<std::endl;
+    std::cout << "origImg2: "<< origImg2<<std::endl;
     
     imgData gpuImg(new byte[origImg.width*origImg.height], origImg.width, origImg.height);
     
