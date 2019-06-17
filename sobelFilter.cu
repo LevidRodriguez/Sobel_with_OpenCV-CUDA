@@ -61,11 +61,12 @@ int main(int argc, char * argv[]){
     // Load Image
     cv::Mat origImg = cv::imread(argv[1]);
     cv::cvtColor(origImg, origImg, cv::COLOR_RGB2GRAY);
-    
+    unsigned char *gpu_orig, *gpu_sobel, *cpu_sobel;
     auto c = std::chrono::system_clock::now();
-    
+    sobel_cpu(origImg.data, cpu_sobel, origImg.cols, origImg.cols);
+    std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
+
     // Allocate memory for the images in GPU memory 
-    unsigned char *gpu_orig, *gpu_sobel;
     cudaMalloc( (void**)&gpu_orig, (origImg.cols * origImg.rows));
     cudaMalloc( (void**)&gpu_sobel, (origImg.cols * origImg.rows));
     // Transfiera del host al device y configura la matriz resultante a 0s
@@ -74,7 +75,9 @@ int main(int argc, char * argv[]){
     // configura los dim3 para que gpu los use como argumentos, hilos por bloque y número de bloques
     dim3 threadsPerBlock(GridSize, GridSize, 1);
     dim3 numBlocks(ceil(origImg.cols/GridSize), ceil(origImg.rows/GridSize), 1);
+    
     // Ejecutar el filtro sobel utilizando la CPU.
+    c = std::chrono::system_clock::now();
     sobelFilterGPU<<<numBlocks, threadsPerBlock>>>(gpu_orig, gpu_sobel, origImg.cols, origImg.rows);
     cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
     // if error, output error
@@ -87,6 +90,7 @@ int main(int argc, char * argv[]){
 
     /** Output runtimes of each method of sobel filtering **/
     std::cout << "\nProcessing "<< argv[1] << ": "<<origImg.rows<<" rows x "<<origImg.cols << " columns" << std::endl;
+    std::cout << "CPU execution time   = " << 1000*time_cpu.count() <<" msec"<<std::endl;
     std::cout << "CUDA execution time   = " << 1000*time_gpu.count() <<" msec"<<std::endl;
 
     // Save results
