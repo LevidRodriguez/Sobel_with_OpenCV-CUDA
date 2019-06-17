@@ -64,6 +64,7 @@ int main(int argc, char * argv[]){
     
     unsigned char *gpu_orig, *gpu_sobel, *cpu_sobel;
     auto c = std::chrono::system_clock::now();
+    std::cout<<"To sobel_cpu function: " << std::endl;
     sobel_cpu(origImg.data, cpu_sobel, origImg.cols, origImg.rows);
     std::cout<<"RETURN FROM sobel_cpu function: " << std::endl;
     std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
@@ -103,15 +104,18 @@ int main(int argc, char * argv[]){
     return 0;
 }
 
-void sobel_cpu(unsigned char* orig, unsigned char* cpu,const unsigned int width, const unsigned int height) {
-    std::cout<<"In sobel_cpu function: " << std::endl;
+void sobel_cpu(const byte* orig, byte* cpu, const unsigned int width, const unsigned int height) {
+    std::cout << width << ", "<<height<<std::endl;
     for(int y = 1; y < height-1; y++) {
         for(int x = 1; x < width-1; x++) {
             int dx = (-1*orig[(y-1)*width + (x-1)]) + (-2*orig[y*width+(x-1)]) + (-1*orig[(y+1)*width+(x-1)]) +
                      (orig[(y-1)*width + (x+1)]) + (2*orig[y*width+(x+1)]) + (orig[(y+1)*width+(x+1)]);
+            
             int dy = (orig[(y-1)*width + (x-1)]) + (2*orig[(y-1)*width+x]) + (orig[(y-1)*width+(x+1)]) +
                 (-1*orig[(y+1)*width + (x-1)]) + (-2*orig[(y+1)*width+x]) + (-1*orig[(y+1)*width+(x+1)]);
-                cpu[y*width + x] = sqrt((dx*dx)+(dy*dy));
-            }
+            
+            cpu[y*width + x] = sqrt((dx*dx)+(dy*dy));
+            std::cout<<cpu[y*width + x]<<" "<<std::endl;
         }
     }
+}
