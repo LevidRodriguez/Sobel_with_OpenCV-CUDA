@@ -18,10 +18,10 @@ __global__ void sobelFilterGPU(cv::Mat *srcImg, cv::Mat *desImg, const unsigned 
         dx = (-1* srcImg->data[(y-1)*cols + (x-1)]) + (-2*srcImg->data[y*cols+(x-1)]) + (-1*srcImg->data[(y+1)*cols+(x-1)]) +
              (    srcImg->data[(y-1)*cols + (x+1)]) + ( 2*srcImg->data[y*cols+(x+1)]) + (   srcImg->data[(y+1)*cols+(x+1)]);
              
-        dy = (    srcImg[(y-1)*cols + (x-1)]) + ( 2*srcImg[(y-1)*cols+x]) + (   srcImg[(y-1)*cols+(x+1)]) +
-             (-1* srcImg[(y+1)*cols + (x-1)]) + (-2*srcImg[(y+1)*cols+x]) + (-1*srcImg[(y+1)*cols+(x+1)]);
+        dy = (    srcImg->data[(y-1)*cols + (x-1)]) + ( 2*srcImg->data[(y-1)*cols+x]) + (   srcImg->data[(y-1)*cols+(x+1)]) +
+             (-1* srcImg->data[(y+1)*cols + (x-1)]) + (-2*srcImg->data[(y+1)*cols+x]) + (-1*srcImg->data[(y+1)*cols+(x+1)]);
         
-        desImg[y*cols + x] = sqrt( (dx*dx) + (dy*dy) );
+        desImg->data[y*cols + x] = sqrt( (dx*dx) + (dy*dy) );
     }
 
 }
