@@ -33,7 +33,7 @@ int main(int argc, char * argv[]){
         std::cout << "Usage: " << argv[0] << " [image.png]"<< std::endl;
         return 1;
     }
-    // Verify GPU, CUDA and OpenCV version
+    // Verifica las versiones de GPU, CUDA y OpenCV.
     cudaDeviceProp devProp;
     cudaGetDeviceProperties(&devProp, 0);
     int cores = devProp.multiProcessorCount;
@@ -59,24 +59,19 @@ int main(int argc, char * argv[]){
                 " Mbytes global memory, "<< cores << " CUDA cores\n" <<std::endl;
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
     
-    // Load Image in gray scale
+    // Cargar imagen y la transforma a escala de grises
     cv::Mat origImg = cv::imread(argv[1]); 
     cv::cvtColor(origImg, origImg, cv::COLOR_RGB2GRAY);
     cv::Mat sobel_cpu = cv::Mat::zeros(origImg.size(),origImg.type());
     
     unsigned char *gpu_orig, *gpu_sobel;
     auto c = std::chrono::system_clock::now();
-    
-    /******************************************START CPU******************************************************/
-    std::cout<<"To sobel_cpu function: " << std::endl;
-    // cv::Mat origImg2 = cv::imread(argv[1]); 
+    /******************************************---START CPU---****************************************************/
     sobelFilterCPU(origImg, sobel_cpu, origImg.cols, origImg.rows);
-    cv::imwrite("outImgCPU.png",sobel_cpu);    
-    std::cout<<"RETURN FROM sobel_cpu function: " << std::endl;
     std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
-    /******************************************END CPU******************************************************/
-    
-    // Allocate memory for the images in GPU memory 
+    /******************************************---END CPU---******************************************************/
+    /******************************************---SETUP GPU---****************************************************/
+    // Asignar memoria para las imágenes en memoria GPU.
     cudaMalloc( (void**)&gpu_orig, (origImg.cols * origImg.rows));
     cudaMalloc( (void**)&gpu_sobel, (origImg.cols * origImg.rows));
     // Transfiera del host al device y configura la matriz resultante a 0s
@@ -85,26 +80,25 @@ int main(int argc, char * argv[]){
     // configura los dim3 para que gpu los use como argumentos, hilos por bloque y número de bloques
     dim3 threadsPerBlock(GridSize, GridSize, 1);
     dim3 numBlocks(ceil(origImg.cols/GridSize), ceil(origImg.rows/GridSize), 1);
-    
-    // Ejecutar el filtro sobel utilizando la CPU.
+    /******************************************---START GPU---****************************************************/
+    // Ejecutar el filtro sobel utilizando la GPU.
     c = std::chrono::system_clock::now();
     sobelFilterGPU<<<numBlocks, threadsPerBlock>>>(gpu_orig, gpu_sobel, origImg.cols, origImg.rows);
     cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
     // if error, output error
     if ( cudaerror != cudaSuccess ) 
         std::cout <<  "Cuda failed to synchronize: " << cudaGetErrorName( cudaerror ) <<std::endl;
-    
     std::chrono::duration<double> time_gpu = std::chrono::system_clock::now() - c;
+    /******************************************---END GPU---****************************************************/
     // Copia los datos al CPU desde la GPU, del device al host
     cudaMemcpy(origImg. data, gpu_sobel, (origImg.cols*origImg.rows), cudaMemcpyDeviceToHost);
-
-    /** Output runtimes of each method of sobel filtering **/
+    /** Tiempos de ejecución de cada método de filtrado por sobel **/
     std::cout << "\nProcessing "<< argv[1] << ": "<<origImg.rows<<" rows x "<<origImg.cols << " columns" << std::endl;
     std::cout << "CPU execution time   = " << 1000*time_cpu.count() <<" msec"<<std::endl;
     std::cout << "CUDA execution time   = " << 1000*time_gpu.count() <<" msec"<<std::endl;
-
     // Save results
-    cv::imwrite("outImg.png",origImg);    
+    cv::imwrite("outImgCPU.png",sobel_cpu);    
+    cv::imwrite("outImgGPU.png",origImg);    
     cudaFree(gpu_orig); cudaFree(gpu_sobel);
 
     return 0;
