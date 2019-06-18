@@ -86,7 +86,7 @@ int main(int argc, char * argv[]){
     /******************************************---START GPU---****************************************************/
     // Ejecutar el filtro sobel utilizando la GPU.
     c = std::chrono::system_clock::now();
-    sobelFilterGPU<<<numBlocks, threadsPerBlock>>>(gpu_orig, gpu_sobel, origImg.cols, origImg.rows);
+    sobelFilterGPU<<< numBlocks, threadsPerBlock, 0, stream >>>(gpu_orig, gpu_sobel, origImg.cols, origImg.rows);
     cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
     // if error, output error
     if ( cudaerror != cudaSuccess ) 
