@@ -10,7 +10,7 @@
 #include <opencv2/core/utility.hpp>
 
 #define GridSize 20.0 
-void sobelFilterCPU(cv::Mat* orig, cv::Mat* cpu, const unsigned int width, const unsigned int height);
+void sobelFilterCPU(cv::Mat orig, cv::Mat cpu, const unsigned int width, const unsigned int height);
 
 __global__ void sobelFilterGPU(unsigned char* orig, unsigned char* cpu, const unsigned int width, const unsigned int height){
     int x = threadIdx.x + blockIdx.x * blockDim.x;
