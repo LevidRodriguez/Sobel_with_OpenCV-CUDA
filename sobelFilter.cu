@@ -70,8 +70,8 @@ int main(int argc, char * argv[]){
     /******************************************START CPU******************************************************/
     std::cout<<"To sobel_cpu function: " << std::endl;
     
-    sobelFilterCPU(origImg, sobel_cpu, origImg.cols, origImg.rows);
-    
+    sobelFilterCPU(&origImg, &sobel_cpu, origImg.cols, origImg.rows);
+
     cv::imwrite("outImgCPU.png",sobel_cpu);    
     std::cout<<"RETURN FROM sobel_cpu function: " << std::endl;
     std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
