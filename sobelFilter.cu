@@ -80,6 +80,9 @@ int main(int argc, char * argv[]){
     // configura los dim3 para que gpu los use como argumentos, hilos por bloque y número de bloques
     dim3 threadsPerBlock(GridSize, GridSize, 1);
     dim3 numBlocks(ceil(origImg.cols/GridSize), ceil(origImg.rows/GridSize), 1);
+    cudaStream_t stream;
+    cudaStreamCreate(&stream);
+
     /******************************************---START GPU---****************************************************/
     // Ejecutar el filtro sobel utilizando la GPU.
     c = std::chrono::system_clock::now();
@@ -98,7 +101,8 @@ int main(int argc, char * argv[]){
     std::cout << "CUDA execution time   = " << 1000*time_gpu.count() <<" msec"<<std::endl;
     // Save results
     cv::imwrite("outImgCPU.png",sobel_cpu);    
-    cv::imwrite("outImgGPU.png",origImg);    
+    cv::imwrite("outImgGPU.png",origImg);
+    cudaStreamDestroy(stream);    
     cudaFree(gpu_orig); cudaFree(gpu_sobel);
 
     return 0;
