@@ -112,7 +112,7 @@ int main(int argc, char * argv[]){
     return 0;
 }
 
-void sobelFilterCPU(cv::Mat* orig, cv::Mat* cpu, const unsigned int width, const unsigned int height){
+void sobelFilterCPU(cv::Mat orig, cv::Mat cpu, const unsigned int width, const unsigned int height){
     cv::cvtColor(orig, cpu, cv::COLOR_RGB2GRAY);
 
     // for(int y = 1; y < origImg.rows-1; y++) {
