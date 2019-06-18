@@ -70,23 +70,23 @@ int main(int argc, char * argv[]){
     /******************************************START CPU******************************************************/
     std::cout<<"To sobel_cpu function: " << std::endl;
     
-    std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
     const unsigned int width = origImg.cols, height = origImg.rows;
     for(int y = 1; y < origImg.rows-1; y++) {
         for(int x = 1; x < origImg.cols-1; x++) {
-            int dx = (-1*orig[(y-1)*width + (x-1)]) + (-2*orig[y*width+(x-1)]) + (-1*orig[(y+1)*width+(x-1)]) +
-                         (orig[(y-1)*width + (x+1)]) + (2*orig[y*width+(x+1)]) + (orig[(y+1)*width+(x+1)]);
-            int dy = (orig[(y-1)*width + (x-1)]) + (2*orig[(y-1)*width+x]) + (orig[(y-1)*width+(x+1)]) +
-                    (-1*orig[(y+1)*width + (x-1)]) + (-2*orig[(y+1)*width+x]) + (-1*orig[(y+1)*width+(x+1)]);
-
+            int dx = (-1*origImg.data[(y-1)*width + (x-1)]) + (-2*origImg.data[y*width+(x-1)]) + (-1*origImg.data[(y+1)*width+(x-1)]) +
+            (origImg.data[(y-1)*width + (x+1)]) + (2*origImg.data[y*width+(x+1)]) + (origImg.data[(y+1)*width+(x+1)]);
+            int dy = (origImg.data[(y-1)*width + (x-1)]) + (2*origImg.data[(y-1)*width+x]) + (origImg.data[(y-1)*width+(x+1)]) +
+            (-1*origImg.data[(y+1)*width + (x-1)]) + (-2*origImg.data[(y+1)*width+x]) + (-1*origImg.data[(y+1)*width+(x+1)]);
+            
             int sum = abs(dx) + abs(dy);
             sum = sum>255?255:sum;
             // cpu[y*width + x] = sqrt((dx*dx)+(dy*dy));
             sobel_cpu.at<uchar>(y,x) = sum;
         }
     }
+    cv::imwrite("outImgCPU.png",sobel_cpu);    
     std::cout<<"RETURN FROM sobel_cpu function: " << std::endl;
-    std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;
+    std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
 
     /******************************************END CPU******************************************************/
     
