@@ -69,8 +69,8 @@ int main(int argc, char * argv[]){
     
     /******************************************START CPU******************************************************/
     std::cout<<"To sobel_cpu function: " << std::endl;
-    cv::Mat origImg2 = cv::imread(argv[1]); 
-    sobelFilterCPU(origImg2, sobel_cpu, origImg.cols, origImg.rows);
+    // cv::Mat origImg2 = cv::imread(argv[1]); 
+    sobelFilterCPU(origImg, sobel_cpu, origImg.cols, origImg.rows);
     cv::imwrite("outImgCPU.png",sobel_cpu);    
     std::cout<<"RETURN FROM sobel_cpu function: " << std::endl;
     std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
@@ -110,21 +110,19 @@ int main(int argc, char * argv[]){
     return 0;
 }
 
-void sobelFilterCPU(cv::Mat orig, cv::Mat cpu, const unsigned int width, const unsigned int height){
-    cv::cvtColor(orig, cpu, cv::COLOR_RGB2GRAY);
-
-    // for(int y = 1; y < origImg.rows-1; y++) {
-    //     for(int x = 1; x < origImg.cols-1; x++) {
-    //         int dx = (-1*origImg.data[(y-1)*width + (x-1)]) + (-2*origImg.data[y*width+(x-1)]) + (-1*origImg.data[(y+1)*width+(x-1)]) +
-    //         (origImg.data[(y-1)*width + (x+1)]) + (2*origImg.data[y*width+(x+1)]) + (origImg.data[(y+1)*width+(x+1)]);
-    //         int dy = (origImg.data[(y-1)*width + (x-1)]) + (2*origImg.data[(y-1)*width+x]) + (origImg.data[(y-1)*width+(x+1)]) +
-    //         (-1*origImg.data[(y+1)*width + (x-1)]) + (-2*origImg.data[(y+1)*width+x]) + (-1*origImg.data[(y+1)*width+(x+1)]);
-            
-    //         // int sum = abs(dx) + abs(dy);
-    //         int sum = sqrt((dx*dx)+(dy*dy));
-    //         // sum = sum>255?255:sum;
-    //         // cpu[y*width + x] = sqrt((dx*dx)+(dy*dy));
-    //         sobel_cpu.at<uchar>(y,x) = sum;
-    //     }
-    // }
+void sobelFilterCPU(cv::Mat origImg, cv::Mat sobel_cpu, const unsigned int width, const unsigned int height){
+    // cv::cvtColor(orig, cpu, cv::COLOR_RGB2GRAY);
+    for(int y = 1; y < origImg.rows-1; y++) {
+        for(int x = 1; x < origImg.cols-1; x++) {
+            int dx = (-1*origImg.data[(y-1)*width + (x-1)]) + (-2*origImg.data[y*width+(x-1)]) + (-1*origImg.data[(y+1)*width+(x-1)]) +
+            (origImg.data[(y-1)*width + (x+1)]) + (2*origImg.data[y*width+(x+1)]) + (origImg.data[(y+1)*width+(x+1)]);
+            int dy = (origImg.data[(y-1)*width + (x-1)]) + (2*origImg.data[(y-1)*width+x]) + (origImg.data[(y-1)*width+(x+1)]) +
+            (-1*origImg.data[(y+1)*width + (x-1)]) + (-2*origImg.data[(y+1)*width+x]) + (-1*origImg.data[(y+1)*width+(x+1)]);
+            // int sum = abs(dx) + abs(dy);
+            int sum = sqrt((dx*dx)+(dy*dy));
+            // sum = sum>255?255:sum;
+            // cpu[y*width + x] = sqrt((dx*dx)+(dy*dy));
+            sobel_cpu.at<uchar>(y,x) = sum;
+        }
+    }
 }
