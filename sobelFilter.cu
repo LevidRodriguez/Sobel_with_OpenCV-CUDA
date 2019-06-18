@@ -78,7 +78,8 @@ int main(int argc, char * argv[]){
             int dy = (origImg.data[(y-1)*width + (x-1)]) + (2*origImg.data[(y-1)*width+x]) + (origImg.data[(y-1)*width+(x+1)]) +
             (-1*origImg.data[(y+1)*width + (x-1)]) + (-2*origImg.data[(y+1)*width+x]) + (-1*origImg.data[(y+1)*width+(x+1)]);
             
-            int sum = abs(dx) + abs(dy);
+            // int sum = abs(dx) + abs(dy);
+            int sum = sqrt((dx*dx)+(dy*dy));
             sum = sum>255?255:sum;
             // cpu[y*width + x] = sqrt((dx*dx)+(dy*dy));
             sobel_cpu.at<uchar>(y,x) = sum;
