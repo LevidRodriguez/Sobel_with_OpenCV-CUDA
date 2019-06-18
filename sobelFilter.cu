@@ -61,18 +61,20 @@ int main(int argc, char * argv[]){
     
     // Load Image in gray scale
     cv::Mat origImg = cv::imread(argv[1]); 
-    /******************************************START CPU******************************************************/
-    std::cout<<"To sobel_cpu function: " << std::endl;
-    sobelFilterCPU(origImg, sobel_cpu, origImg.cols, origImg.rows);
-    cv::imwrite("outImgCPU.png",sobel_cpu);    
-    std::cout<<"RETURN FROM sobel_cpu function: " << std::endl;
-    // std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
-    /******************************************END CPU******************************************************/
     cv::cvtColor(origImg, origImg, cv::COLOR_RGB2GRAY);
     cv::Mat sobel_cpu = cv::Mat::zeros(origImg.size(),origImg.type());
     
     unsigned char *gpu_orig, *gpu_sobel;
     auto c = std::chrono::system_clock::now();
+    
+    /******************************************START CPU******************************************************/
+    std::cout<<"To sobel_cpu function: " << std::endl;
+    cv::Mat origImg2 = cv::imread(argv[1]); 
+    sobelFilterCPU(origImg2, sobel_cpu, origImg.cols, origImg.rows);
+    cv::imwrite("outImgCPU.png",sobel_cpu);    
+    std::cout<<"RETURN FROM sobel_cpu function: " << std::endl;
+    std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
+    /******************************************END CPU******************************************************/
     
     // Allocate memory for the images in GPU memory 
     cudaMalloc( (void**)&gpu_orig, (origImg.cols * origImg.rows));
