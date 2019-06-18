@@ -58,19 +58,36 @@ int main(int argc, char * argv[]){
     std::cout << "GPGPU: " << devProp.name << ", CUDA "<< devProp.major << "."<< devProp.minor <<", "<< devProp.totalGlobalMem / 1048576 << 
                 " Mbytes global memory, "<< cores << " CUDA cores\n" <<std::endl;
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
+    
     // Load Image in gray scale
     cv::Mat origImg = cv::imread(argv[1]); 
     cv::cvtColor(origImg, origImg, cv::COLOR_RGB2GRAY);
+    cv::Mat sobel_cpu = cv::Mat::zeros(origImg.size(),origImg.type());
     
-    unsigned char *gpu_orig, *gpu_sobel, *cpu_sobel;
+    unsigned char *gpu_orig, *gpu_sobel;
     auto c = std::chrono::system_clock::now();
     
     /******************************************START CPU******************************************************/
     std::cout<<"To sobel_cpu function: " << std::endl;
-    // sobel_cpu(origImg.data, cpu_sobel, origImg.cols, origImg.rows);
-    std::cout<<"RETURN FROM sobel_cpu function: " << std::endl;
+    
     std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
-    // cv::imwrite("sobel_cpu.png", sobel_cpu);
+    const unsigned int width = origImg.cols, height = origImg.rows;
+    for(int y = 1; y < origImg.rows-1; y++) {
+        for(int x = 1; x < origImg.cols-1; x++) {
+            int dx = (-1*orig[(y-1)*width + (x-1)]) + (-2*orig[y*width+(x-1)]) + (-1*orig[(y+1)*width+(x-1)]) +
+                         (orig[(y-1)*width + (x+1)]) + (2*orig[y*width+(x+1)]) + (orig[(y+1)*width+(x+1)]);
+            int dy = (orig[(y-1)*width + (x-1)]) + (2*orig[(y-1)*width+x]) + (orig[(y-1)*width+(x+1)]) +
+                    (-1*orig[(y+1)*width + (x-1)]) + (-2*orig[(y+1)*width+x]) + (-1*orig[(y+1)*width+(x+1)]);
+
+            int sum = abs(dx) + abs(dy);
+            sum = sum>255?255:sum;
+            // cpu[y*width + x] = sqrt((dx*dx)+(dy*dy));
+            sobel_cpu.at<uchar>(y,x) = sum;
+        }
+    }
+    std::cout<<"RETURN FROM sobel_cpu function: " << std::endl;
+    std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;
+
     /******************************************END CPU******************************************************/
     
     // Allocate memory for the images in GPU memory 
