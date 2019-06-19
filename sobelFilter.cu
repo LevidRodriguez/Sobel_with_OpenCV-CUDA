@@ -12,20 +12,20 @@
 void sobelFilterCPU(cv::Mat srcImg, cv::Mat dstImg, const unsigned int width, const unsigned int height);
 void sobelFilterOpenCV(cv::Mat srcImg, cv::Mat dstImg);
 
-__global__ void sobelFilterOpenCVGradXGPU(cv::Mat srcImg, cv::Mat dstImg){
+__global__ void sobelFilterOpenCVGradXGPU(unsigned char* srcImg, unsigned char* dstImg){
     // cv::Mat grad_x;
     // Gradiente X
     cv::Sobel(srcImg, dstImg, CV_16S, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
     cv::convertScaleAbs(dstImg, dstImg);
 }
 
-__global__ void sobelFilterOpenCVGradYGPU(cv::Mat srcImg, cv::Mat dstImg){
+__global__ void sobelFilterOpenCVGradYGPU(unsigned char* srcImg, unsigned char* dstImg){
     // Gradiente Y
     cv::Sobel(srcImg, dstImg, CV_16S, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
     cv::convertScaleAbs(dstImg, dstImg);
 }
 
-__global__ void sobelFilterOpenCVAddGPU(cv::Mat srcImgX,cv::Mat srcImgY, cv::Mat dstImg){
+__global__ void sobelFilterOpenCVAddGPU(unsigned char* srcImgX, unsigned char* srcImgY, unsigned char* dstImg){
     addWeighted( srcImgX, 0.5, srcImgY, 0.5, 0, dstImg );
 }
 
