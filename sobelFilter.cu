@@ -111,9 +111,9 @@ int main(int argc, char * argv[]){
     /******************************************---START GPU---****************************************************/
     // Ejecutar el filtro sobel utilizando la OpenCv y GPU.
     start_time = std::chrono start_time = std::chrono::system_clock::now();
-    sobelFilterOpenCVGradXGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_orig, gpu_gradx);
-    sobelFilterOpenCVGradYGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_orig, gpu_grady);
-    sobelFilterOpenCVAddGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_gradx, gpu_grady, gpu_grads_add);
+    sobelFilterOpenCVGradXGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_orig, gpu_gradx, srcImg.rows, srcImg.cols);
+    // sobelFilterOpenCVGradYGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_orig, gpu_grady);
+    // sobelFilterOpenCVAddGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_gradx, gpu_grady, gpu_grads_add);
     cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
     // if error, output error
     if ( cudaerror != cudaSuccess ) 
@@ -143,7 +143,7 @@ int main(int argc, char * argv[]){
     cv::imwrite("outImgCPU.png",sobel_cpu);    
     cv::imwrite("outImgOpenCV.png",sobel_opencv);
     cv::imwrite("outImgGPU.png",srcImg);
-    cv::imwrite("outImgOpenCVandCUDA.png",gpu_grads_add);
+    // cv::imwrite("outImgOpenCVandCUDA.png",gpu_grads_add);
     cudaStreamDestroy(stream);    
     cudaFree(gpu_orig); cudaFree(gpu_sobel);
 
