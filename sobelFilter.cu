@@ -12,6 +12,23 @@
 void sobelFilterCPU(cv::Mat srcImg, cv::Mat dstImg, const unsigned int width, const unsigned int height);
 void sobelFilterOpenCV(cv::Mat srcImg, cv::Mat dstImg);
 
+__global__ void sobelFilterOpenCVGradXGPU(cv::Mat srcImg, cv::Mat dstImg){
+    // cv::Mat grad_x;
+    // Gradiente X
+    cv::Sobel(srcImg, dstImg, CV_16S, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
+    cv::convertScaleAbs(dstImg, dstImg);
+}
+
+__global__ void sobelFilterOpenCVGradYGPU(cv::Mat srcImg, cv::Mat dstImg){
+    // Gradiente Y
+    cv::Sobel(srcImg, dstImg, CV_16S, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
+    cv::convertScaleAbs(dstImg, dstImg);
+}
+
+__global__ void sobelFilterOpenCVAddGPU(cv::Mat srcImgX,cv::Mat srcImgY, cv::Mat dstImg){
+    addWeighted( srcImgX, 0.5, srcImgY, 0.5, 0, dstImg );
+}
+
 __global__ void sobelFilterGPU(unsigned char* srcImg, unsigned char* dstImg, const unsigned int width, const unsigned int height){
     int x = threadIdx.x + blockIdx.x * blockDim.x;
     int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -34,28 +51,16 @@ int main(int argc, char * argv[]){
         return 1;
     }
     // Verifica las versiones de GPU, CUDA y OpenCV.
-    cudaDeviceProp devProp;
-    cudaGetDeviceProperties(&devProp, 0);
-    // int cores = devProp.multiProcessorCount;
-    // switch (devProp.major){
-	// case 2: // Fermi
-	// 	if (devProp.minor == 1) cores *= 48;
-	// 	else cores *= 32; break;
-	// case 3: // Kepler
-	// 	cores *= 192; break;
-	// case 5: // Maxwell
-	// 	cores *= 128; break;
-	// case 6: // Pascal
-	// 	if (devProp.minor == 1) cores *= 128;
-	// 	else if (devProp.minor == 0) cores *= 64;
-	// 	break;
-    // }
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, 0);
+    
     time_t rawTime; time(&rawTime);
     struct tm* curTime = localtime(&rawTime);
     char timeBuffer[80] = "";
     strftime(timeBuffer, 80, "---------- %c ----------", curTime);
     std::cout << timeBuffer << std::endl;
-    std::cout << "GPU: " << devProp.name << ", CUDA "<< devProp.major << "."<< devProp.minor <<", "<< devProp.totalGlobalMem / 1048576 << 
+    
+    std::cout << "GPU: " << deviceProp.name << ", CUDA "<< deviceProp.major << "."<< deviceProp.minor <<", "<< deviceProp.totalGlobalMem / 1048576 << 
                 " Mbytes " <<std::endl; //<< cores << " CUDA cores\n" <<std::endl;
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
     
@@ -64,6 +69,10 @@ int main(int argc, char * argv[]){
     cv::cvtColor(srcImg, srcImg, cv::COLOR_RGB2GRAY);
     cv::Mat sobel_cpu = cv::Mat::zeros(srcImg.size(),srcImg.type());
     cv::Mat sobel_opencv = cv::Mat::zeros(srcImg.size(), srcImg.type());
+    
+    cv::Mat gpu_gradx = cv::Mat::zeros(srcImg.size(), srcImg.type());
+    cv::Mat gpu_grady = cv::Mat::zeros(srcImg.size(), srcImg.type());
+    cv::Mat gpu_grads_add = cv::Mat::zeros(srcImg.size(), srcImg.type());
     
     unsigned char *gpu_orig, *gpu_sobel;
     auto start_time = std::chrono::system_clock::now();
@@ -82,9 +91,19 @@ int main(int argc, char * argv[]){
     // Asignar memoria para las imágenes en memoria GPU.
     cudaMalloc( (void**)&gpu_orig, (srcImg.cols * srcImg.rows));
     cudaMalloc( (void**)&gpu_sobel, (srcImg.cols * srcImg.rows));
+
+    cudaMalloc( (void**)&gpu_gradx, (srcImg.cols * srcImg.rows));
+    cudaMalloc( (void**)&gpu_grady, (srcImg.cols * srcImg.rows));
+    cudaMalloc( (void**)&gpu_grads_add, (srcImg.cols * srcImg.rows));
+
     // Transfiera del host al device y configura la matriz resultante a 0s
     cudaMemcpy(gpu_orig, srcImg.data, (srcImg.cols*srcImg.rows), cudaMemcpyHostToDevice);
     cudaMemset(gpu_sobel, 0, (srcImg.cols*srcImg.rows));
+
+    cudaMemset(gpu_gradx, 0, (srcImg.cols*srcImg.rows));
+    cudaMemset(gpu_grady, 0, (srcImg.cols*srcImg.rows));
+    cudaMemset(gpu_grads_add, 0, (srcImg.cols*srcImg.rows));
+
     // configura los dim3 para que gpu los use como argumentos, hilos por bloque y número de bloques
     dim3 threadsPerBlock(GridSize, GridSize, 1);
     dim3 numBlocks(ceil(srcImg.cols/GridSize), ceil(srcImg.rows/GridSize), 1);
@@ -92,6 +111,18 @@ int main(int argc, char * argv[]){
     //Streams
     cudaStreamCreate(&stream);
     /******************************************---START GPU---****************************************************/
+    // Ejecutar el filtro sobel utilizando la OpenCv y GPU.
+    start_time = std::chrono start_time = std::chrono::system_clock::now();
+    sobelFilterOpenCVGradXGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_orig, gpu_gradx);
+    sobelFilterOpenCVGradYGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_orig, gpu_grady);
+    sobelFilterOpenCVAddGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_gradx, gpu_grady, gpu_grads_add);
+    cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
+    // if error, output error
+    if ( cudaerror != cudaSuccess ) 
+        std::cout <<  "Cuda failed to synchronize: " << cudaGetErrorName( cudaerror ) <<std::endl;
+    std::chrono::duration<double> time_gpu_opencv = std::chrono::system_clock::now() - start_time;
+
+
     // Ejecutar el filtro sobel utilizando la GPU.
     start_time = std::chrono::system_clock::now();
     sobelFilterGPU<<< numBlocks, threadsPerBlock, 0, stream >>>(gpu_orig, gpu_sobel, srcImg.cols, srcImg.rows);
@@ -108,10 +139,12 @@ int main(int argc, char * argv[]){
     std::cout << "CPU execution time   = " << 1000*time_cpu.count() <<" msec"<<std::endl;
     std::cout << "OPENCV execution time   = " << 1000*time_opencv.count() <<" msec"<<std::endl;
     std::cout << "CUDA execution time   = " << 1000*time_gpu.count() <<" msec"<<std::endl;
+    std::cout << "CUDA + OPENCV execution time   = " << 1000*time_gpu_opencv.count() <<" msec"<<std::endl;
     // Save results
     cv::imwrite("outImgCPU.png",sobel_cpu);    
     cv::imwrite("outImgOpenCV.png",sobel_opencv);
     cv::imwrite("outImgGPU.png",srcImg);
+    cv::imwrite("outImgOpenCVandCUDA.png",gpu_grads_add);
     cudaStreamDestroy(stream);    
     cudaFree(gpu_orig); cudaFree(gpu_sobel);
 
