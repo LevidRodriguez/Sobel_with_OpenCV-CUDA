@@ -3,7 +3,6 @@
 #include <time.h>
 #include <iostream>
 #include <math.h>
-// #include "imageLoader.cpp"
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/stitching.hpp>
@@ -37,27 +36,27 @@ int main(int argc, char * argv[]){
     // Verifica las versiones de GPU, CUDA y OpenCV.
     cudaDeviceProp devProp;
     cudaGetDeviceProperties(&devProp, 0);
-    int cores = devProp.multiProcessorCount;
-    switch (devProp.major){
-	case 2: // Fermi
-		if (devProp.minor == 1) cores *= 48;
-		else cores *= 32; break;
-	case 3: // Kepler
-		cores *= 192; break;
-	case 5: // Maxwell
-		cores *= 128; break;
-	case 6: // Pascal
-		if (devProp.minor == 1) cores *= 128;
-		else if (devProp.minor == 0) cores *= 64;
-		break;
-    }
-    time_t rawTime;time(&rawTime);
+    // int cores = devProp.multiProcessorCount;
+    // switch (devProp.major){
+	// case 2: // Fermi
+	// 	if (devProp.minor == 1) cores *= 48;
+	// 	else cores *= 32; break;
+	// case 3: // Kepler
+	// 	cores *= 192; break;
+	// case 5: // Maxwell
+	// 	cores *= 128; break;
+	// case 6: // Pascal
+	// 	if (devProp.minor == 1) cores *= 128;
+	// 	else if (devProp.minor == 0) cores *= 64;
+	// 	break;
+    // }
+    // time_t rawTime;time(&rawTime);
     struct tm* curTime = localtime(&rawTime);
     char timeBuffer[80] = "";
-    strftime(timeBuffer, 80, "edge map benchmarks (%c)\n", curTime);
+    strftime(timeBuffer, 80, "---------- %c ----------", curTime);
     std::cout << timeBuffer << std::endl;
-    std::cout << "GPGPU: " << devProp.name << ", CUDA "<< devProp.major << "."<< devProp.minor <<", "<< devProp.totalGlobalMem / 1048576 << 
-                " Mbytes global memory, "<< cores << " CUDA cores\n" <<std::endl;
+    std::cout << "GPU: " << devProp.name << ", CUDA "<< devProp.major << "."<< devProp.minor <<", "<< devProp.totalGlobalMem / 1048576 << 
+                " Mbytes " <<std::endl; //<< cores << " CUDA cores\n" <<std::endl;
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
     
     // Cargar imagen y la transforma a escala de grises
@@ -67,16 +66,16 @@ int main(int argc, char * argv[]){
     cv::Mat sobel_opencv = cv::Mat::zeros(srcImg.size(), srcImg.type());
     
     unsigned char *gpu_orig, *gpu_sobel;
-    auto c = std::chrono::system_clock::now();
+    auto start_time = std::chrono::system_clock::now();
     /******************************************---START CPU---****************************************************/
     sobelFilterCPU(srcImg, sobel_cpu, srcImg.cols, srcImg.rows);
-    std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;    
+    std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - start_time;    
     /******************************************---END CPU---******************************************************/
     
     /******************************************---START OPENCV---****************************************************/
-    c = std::chrono::system_clock::now();
+    start_time = std::chrono::system_clock::now();
     sobelFilterOpenCV(srcImg, sobel_opencv);
-    std::chrono::duration<double> time_opencv = std::chrono::system_clock::now() - c;    
+    std::chrono::duration<double> time_opencv = std::chrono::system_clock::now() - start_time;    
     /******************************************---END OPENCV---******************************************************/
 
     /******************************************---SETUP GPU---****************************************************/
@@ -90,22 +89,22 @@ int main(int argc, char * argv[]){
     dim3 threadsPerBlock(GridSize, GridSize, 1);
     dim3 numBlocks(ceil(srcImg.cols/GridSize), ceil(srcImg.rows/GridSize), 1);
     cudaStream_t stream;
+    //Streams
     cudaStreamCreate(&stream);
-
     /******************************************---START GPU---****************************************************/
     // Ejecutar el filtro sobel utilizando la GPU.
-    c = std::chrono::system_clock::now();
+    start_time = std::chrono::system_clock::now();
     sobelFilterGPU<<< numBlocks, threadsPerBlock, 0, stream >>>(gpu_orig, gpu_sobel, srcImg.cols, srcImg.rows);
     cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
     // if error, output error
     if ( cudaerror != cudaSuccess ) 
         std::cout <<  "Cuda failed to synchronize: " << cudaGetErrorName( cudaerror ) <<std::endl;
-    std::chrono::duration<double> time_gpu = std::chrono::system_clock::now() - c;
+    std::chrono::duration<double> time_gpu = std::chrono::system_clock::now() - start_time;
     /******************************************---END GPU---****************************************************/
     // Copia los datos al CPU desde la GPU, del device al host
     cudaMemcpy(srcImg. data, gpu_sobel, (srcImg.cols*srcImg.rows), cudaMemcpyDeviceToHost);
     /** Tiempos de ejecución de cada método de filtrado por sobel **/
-    std::cout << "\nProcessing "<< argv[1] << ": "<<srcImg.rows<<" rows x "<<srcImg.cols << " columns" << std::endl;
+    std::cout << "Archivo: "<< argv[1] << ": "<<srcImg.rows<<" rows x "<<srcImg.cols << " columns" << std::endl;
     std::cout << "CPU execution time   = " << 1000*time_cpu.count() <<" msec"<<std::endl;
     std::cout << "OPENCV execution time   = " << 1000*time_opencv.count() <<" msec"<<std::endl;
     std::cout << "CUDA execution time   = " << 1000*time_gpu.count() <<" msec"<<std::endl;
