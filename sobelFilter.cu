@@ -50,7 +50,7 @@ int main(int argc, char * argv[]){
 	// 	else if (devProp.minor == 0) cores *= 64;
 	// 	break;
     // }
-    // time_t rawTime;time(&rawTime);
+    time_t rawTime; time(&rawTime);
     struct tm* curTime = localtime(&rawTime);
     char timeBuffer[80] = "";
     strftime(timeBuffer, 80, "---------- %c ----------", curTime);
