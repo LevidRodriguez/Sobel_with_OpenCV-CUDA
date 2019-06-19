@@ -110,7 +110,7 @@ int main(int argc, char * argv[]){
     cudaStreamCreate(&stream);
     /******************************************---START GPU---****************************************************/
     // Ejecutar el filtro sobel utilizando la OpenCv y GPU.
-    start_time = std::chrono start_time = std::chrono::system_clock::now();
+    start_time = std::chrono::system_clock::now();
     sobelFilterOpenCVGradXGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_orig, gpu_gradx, srcImg.rows, srcImg.cols);
     // sobelFilterOpenCVGradYGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_orig, gpu_grady);
     // sobelFilterOpenCVAddGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_gradx, gpu_grady, gpu_grads_add);
