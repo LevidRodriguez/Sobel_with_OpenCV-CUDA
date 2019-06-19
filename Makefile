@@ -8,16 +8,16 @@
 LINK = nvcc
 
 # Name of our binary executable
-OUT_FILE = edge
+OUT_FILE = sobelFilter
 
 # Any weird flags ( -O2/-O3/-Wno-deprecated-gpu-targets/-fopenmp/etc)
 FLAGS = -Wno-deprecated-gpu-targets -O2 -Xcompiler -fopenmp -std=c++11
 OPENCV = `pkg-config opencv --cflags --libs`
 
 
-all: edge
+all: sobelFilter
 
-edge: sobelFilter.cu lodepng.cpp
+sobelFilter: sobelFilter.cu #lodepng.cpp
 	$(LINK) -o $(OUT_FILE) $(FLAGS) $(OPENCV) $^
 
 clean: 
