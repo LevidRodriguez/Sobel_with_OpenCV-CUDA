@@ -14,7 +14,7 @@ void sobelFilterOpenCV(cv::Mat srcImg, cv::Mat dstImg);
 
 __global__ void sobelFilterOpenCVGradXGPU(unsigned char* srcImg, unsigned char* dstImg, const unsigned int h, const unsigned int w){
     cv::Mat TempMat(h,w,CV_8UC1,srcImg,cv::Mat::AUTO_STEP);
-    cv::Mat TempMatX = cv::Mat::zeros(h*w, CV_8UC1);
+    cv::Mat TempMatX;
     TempMatX.data = srcImg;
     // cv::Mat TempMat2 = cv::Mat(h, w, CV_8UC1, dstImg);
     // cv::Sobel(TempMat, TempMat2, CV_16S, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
