@@ -1,23 +1,18 @@
-################ MAKEFILE TEMPLATE ################
+# Author : Levid Rodriguez Santiago
 
-# Author : Lucas Carpenter
-
-# Usage : make target1
-
-# What compiler are we using? (gcc, g++, nvcc, etc)
+# Compiler to use? (gcc, g++, nvcc, etc)
 LINK = nvcc
 
-# Name of our binary executable
+# Name of binary executable
 OUT_FILE = sobelFilter
 
-# Any weird flags ( -O2/-O3/-Wno-deprecated-gpu-targets/-fopenmp/etc)
+# flags 
 FLAGS = -Wno-deprecated-gpu-targets -O2 -Xcompiler -fopenmp -std=c++11
 OPENCV = `pkg-config opencv --cflags --libs`
 
-
 all: sobelFilter
 
-sobelFilter: sobelFilter.cu #lodepng.cpp
+sobelFilter: sobelFilter.cu
 	$(LINK) -o $(OUT_FILE) $(FLAGS) $(OPENCV) $^
 
 clean: 
