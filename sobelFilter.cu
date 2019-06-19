@@ -103,7 +103,7 @@ int main(int argc, char * argv[]){
     // Libera recursos
     cudaEventRecord(stop);
     float time_milliseconds =0;
-    cudaEventElapsedTime(time_milliseconds, start, stop);
+    cudaEventElapsedTime(&time_milliseconds, start, stop);
     cudaStreamDestroy(stream);    
     cudaFree(gpu_src); 
     cudaFree(gpu_sobel);
