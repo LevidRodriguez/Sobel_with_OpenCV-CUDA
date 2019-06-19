@@ -20,15 +20,15 @@ __global__ void sobelFilterOpenCVGradXGPU(unsigned char* srcImg, unsigned char* 
     dstImg = TempMat2.data;
 }
 
-__global__ void sobelFilterOpenCVGradYGPU(unsigned char* srcImg, unsigned char* dstImg){
-    // Gradiente Y
-    cv::Sobel(srcImg, dstImg, CV_16S, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
-    cv::convertScaleAbs(dstImg, dstImg);
-}
+// __global__ void sobelFilterOpenCVGradYGPU(unsigned char* srcImg, unsigned char* dstImg){
+//     // Gradiente Y
+//     cv::Sobel(srcImg, dstImg, CV_16S, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
+//     cv::convertScaleAbs(dstImg, dstImg);
+// }
 
-__global__ void sobelFilterOpenCVAddGPU(unsigned char* srcImgX, unsigned char* srcImgY, unsigned char* dstImg){
-    addWeighted( srcImgX, 0.5, srcImgY, 0.5, 0, dstImg );
-}
+// __global__ void sobelFilterOpenCVAddGPU(unsigned char* srcImgX, unsigned char* srcImgY, unsigned char* dstImg){
+//     addWeighted( srcImgX, 0.5, srcImgY, 0.5, 0, dstImg );
+// }
 
 __global__ void sobelFilterGPU(unsigned char* srcImg, unsigned char* dstImg, const unsigned int width, const unsigned int height){
     int x = threadIdx.x + blockIdx.x * blockDim.x;
@@ -132,7 +132,7 @@ int main(int argc, char * argv[]){
     /******************************************---END GPU---****************************************************/
     // Copia los datos al CPU desde la GPU, del device al host
     cudaMemcpy(srcImg.data, gpu_sobel, (srcImg.cols*srcImg.rows), cudaMemcpyDeviceToHost);
-    cudaMemcpy(sobel_opencv_cuda.data, gpu_grads_add, (srcImg.cols*srcImg.rows), cudaMemcpyDeviceToHost);
+    cudaMemcpy(sobel_opencv_cuda.data, gpu_gradx, (srcImg.cols*srcImg.rows), cudaMemcpyDeviceToHost);
     /** Tiempos de ejecución de cada método de filtrado por sobel **/
     std::cout << "Archivo: "<< argv[1] << ": "<<srcImg.rows<<" rows x "<<srcImg.cols << " columns" << std::endl;
     std::cout << "CPU execution time   = " << 1000*time_cpu.count() <<" msec"<<std::endl;
@@ -143,7 +143,7 @@ int main(int argc, char * argv[]){
     cv::imwrite("outImgCPU.png",sobel_cpu);    
     cv::imwrite("outImgOpenCV.png",sobel_opencv);
     cv::imwrite("outImgGPU.png",srcImg);
-    // cv::imwrite("outImgOpenCVandCUDA.png",gpu_grads_add);
+    cv::imwrite("outImgOpenCVandCUDA.png",gpu_grads_add);
     cudaStreamDestroy(stream);    
     cudaFree(gpu_orig); cudaFree(gpu_sobel);
 
