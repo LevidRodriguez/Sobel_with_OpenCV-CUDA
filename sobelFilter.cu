@@ -15,7 +15,7 @@ void sobelFilterOpenCV(cv::Mat srcImg, cv::Mat dstImg);
 __global__ void sobelFilterGPU(unsigned char* srcImg, unsigned char* dstImg, const unsigned int width, const unsigned int height){
     int x = threadIdx.x + blockIdx.x * blockDim.x;
     int y = threadIdx.y + blockIdx.y * blockDim.y;
-    int dx, dy;
+    float dx, dy;
     if( x > 0 && y > 0 && x < width-1 && y < height-1) {
         dx = (-1* srcImg[(y-1)*width + (x-1)]) + (-2*srcImg[y*width+(x-1)]) + (-1*srcImg[(y+1)*width+(x-1)]) +
              (    srcImg[(y-1)*width + (x+1)]) + ( 2*srcImg[y*width+(x+1)]) + (   srcImg[(y+1)*width+(x+1)]);
