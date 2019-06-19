@@ -12,11 +12,12 @@
 void sobelFilterCPU(cv::Mat srcImg, cv::Mat dstImg, const unsigned int width, const unsigned int height);
 void sobelFilterOpenCV(cv::Mat srcImg, cv::Mat dstImg);
 
-__global__ void sobelFilterOpenCVGradXGPU(unsigned char* srcImg, unsigned char* dstImg){
-    // cv::Mat grad_x;
-    // Gradiente X
-    cv::Sobel(srcImg, dstImg, CV_16S, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
-    cv::convertScaleAbs(dstImg, dstImg);
+__global__ void sobelFilterOpenCVGradXGPU(unsigned char* srcImg, unsigned char* dstImg, const unsigned int h, const unsigned int w){
+    cv::Mat TempMat = cv::Mat(h, w, CV_8UC1, srcImg);
+    cv::Mat TempMat2 = cv::Mat(h, w, CV_8UC1, dstImg);
+    cv::Sobel(TempMat, TempMat2, CV_16S, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
+    cv::convertScaleAbs(TempMat2, TempMat2);
+    dstImg = TempMat2.data;
 }
 
 __global__ void sobelFilterOpenCVGradYGPU(unsigned char* srcImg, unsigned char* dstImg){
