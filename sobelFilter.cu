@@ -67,6 +67,13 @@ int main(int argc, char * argv[]){
     // ---END OPENCV
 
     // ---SETUP GPU
+    // Eventos
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    //Streams
+    cudaStream_t stream;
+    cudaStreamCreate(&stream);
     // Asignar memoria para las imágenes en memoria GPU.
     cudaMalloc( (void**)&gpu_src, (srcImg.cols * srcImg.rows));
     cudaMalloc( (void**)&gpu_sobel, (srcImg.cols * srcImg.rows));
@@ -78,12 +85,10 @@ int main(int argc, char * argv[]){
     // configura los dim3 para que gpu los use como argumentos, hilos por bloque y número de bloques
     dim3 threadsPerBlock(GridSize, GridSize, 1);
     dim3 numBlocks(ceil(srcImg.cols/GridSize), ceil(srcImg.rows/GridSize), 1);
-    //Streams
-    cudaStream_t stream;
-    cudaStreamCreate(&stream);
     
     // ---START GPU
     // Ejecutar el filtro sobel utilizando la GPU.
+    cudaEventRecord(start);
     start_time = std::chrono::system_clock::now();
     sobelFilterGPU<<< numBlocks, threadsPerBlock, 0, stream >>>(gpu_src, gpu_sobel, srcImg.cols, srcImg.rows);
     cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
@@ -96,6 +101,9 @@ int main(int argc, char * argv[]){
     // Copia los datos al CPU desde la GPU, del device al host
     cudaMemcpy(srcImg.data, gpu_sobel, (srcImg.cols*srcImg.rows), cudaMemcpyDeviceToHost);
     // Libera recursos
+    cudaEventRecord(stop);
+    float time_milliseconds =0;
+    cudaEventElapsedTime(time_milliseconds, start, stop);
     cudaStreamDestroy(stream);    
     cudaFree(gpu_src); 
     cudaFree(gpu_sobel);
@@ -104,6 +112,7 @@ int main(int argc, char * argv[]){
     std::cout << "CPU execution time   = " << 1000*time_cpu.count() <<" msec"<<std::endl;
     std::cout << "OPENCV execution time   = " << 1000*time_opencv.count() <<" msec"<<std::endl;
     std::cout << "CUDA execution time   = " << 1000*time_gpu.count() <<" msec"<<std::endl;
+    std::cout << "CUDA execution time   = " << time_milliseconds <<" msec"<<std::endl;
     
     // Guarda resultados
     cv::imwrite("outImgCPU.png",sobel_cpu);    
