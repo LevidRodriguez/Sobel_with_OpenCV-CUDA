@@ -69,12 +69,9 @@ int main(int argc, char * argv[]){
     cv::cvtColor(srcImg, srcImg, cv::COLOR_RGB2GRAY);
     cv::Mat sobel_cpu = cv::Mat::zeros(srcImg.size(),srcImg.type());
     cv::Mat sobel_opencv = cv::Mat::zeros(srcImg.size(), srcImg.type());
+    cv::Mat sobel_opencv_cuda = cv::Mat::zeros(srcImg.size(), srcImg.type());
     
-    cv::Mat gpu_gradx = cv::Mat::zeros(srcImg.size(), srcImg.type());
-    cv::Mat gpu_grady = cv::Mat::zeros(srcImg.size(), srcImg.type());
-    cv::Mat gpu_grads_add = cv::Mat::zeros(srcImg.size(), srcImg.type());
-    
-    unsigned char *gpu_orig, *gpu_sobel;
+    unsigned char *gpu_orig, *gpu_sobel, *gpu_gradx, *gpu_grady, *gpu_grads_add;
     auto start_time = std::chrono::system_clock::now();
     /******************************************---START CPU---****************************************************/
     sobelFilterCPU(srcImg, sobel_cpu, srcImg.cols, srcImg.rows);
@@ -133,7 +130,8 @@ int main(int argc, char * argv[]){
     std::chrono::duration<double> time_gpu = std::chrono::system_clock::now() - start_time;
     /******************************************---END GPU---****************************************************/
     // Copia los datos al CPU desde la GPU, del device al host
-    cudaMemcpy(srcImg. data, gpu_sobel, (srcImg.cols*srcImg.rows), cudaMemcpyDeviceToHost);
+    cudaMemcpy(srcImg.data, gpu_sobel, (srcImg.cols*srcImg.rows), cudaMemcpyDeviceToHost);
+    cudaMemcpy(sobel_opencv_cuda.data, gpu_grads_add, (srcImg.cols*srcImg.rows), cudaMemcpyDeviceToHost);
     /** Tiempos de ejecución de cada método de filtrado por sobel **/
     std::cout << "Archivo: "<< argv[1] << ": "<<srcImg.rows<<" rows x "<<srcImg.cols << " columns" << std::endl;
     std::cout << "CPU execution time   = " << 1000*time_cpu.count() <<" msec"<<std::endl;
