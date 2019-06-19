@@ -114,10 +114,10 @@ int main(int argc, char * argv[]){
     sobelFilterOpenCVGradXGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_orig, gpu_gradx, srcImg.rows, srcImg.cols);
     // sobelFilterOpenCVGradYGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_orig, gpu_grady);
     // sobelFilterOpenCVAddGPU<<< numBlocks, threadsPerBlock, 0, stream >>> (gpu_gradx, gpu_grady, gpu_grads_add);
-    cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
-    // if error, output error
-    if ( cudaerror != cudaSuccess ) 
-        std::cout <<  "Cuda failed to synchronize: " << cudaGetErrorName( cudaerror ) <<std::endl;
+    // cudaError_t cudaerror = cudaDeviceSynchronize(); // waits for completion, returns error code
+    // // if error, output error
+    // if ( cudaerror != cudaSuccess ) 
+    //     std::cout <<  "Cuda failed to synchronize: " << cudaGetErrorName( cudaerror ) <<std::endl;
     std::chrono::duration<double> time_gpu_opencv = std::chrono::system_clock::now() - start_time;
 
 
