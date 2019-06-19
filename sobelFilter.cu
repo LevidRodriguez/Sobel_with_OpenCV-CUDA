@@ -13,7 +13,8 @@ void sobelFilterCPU(cv::Mat srcImg, cv::Mat dstImg, const unsigned int width, co
 void sobelFilterOpenCV(cv::Mat srcImg, cv::Mat dstImg);
 
 __global__ void sobelFilterOpenCVGradXGPU(unsigned char* srcImg, unsigned char* dstImg, const unsigned int h, const unsigned int w){
-    std::cout<<"Hola Funcion sobelFilterOpenCVGradXGPU"<<std::endl;
+    // std::cout<<"Hola Funcion sobelFilterOpenCVGradXGPU"<<std::endl;
+    printf("HOla Mundo");
     // cv::Mat TempMat(h,w,CV_8UC1,srcImg,cv::Mat::AUTO_STEP);
     // cv::Mat TempMatX;
     // TempMatX.data = srcImg;
