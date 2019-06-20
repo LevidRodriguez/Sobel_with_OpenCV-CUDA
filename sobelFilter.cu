@@ -15,14 +15,12 @@ void sobelFilterOpenCV(cv::Mat srcImg, cv::Mat dstImg);
 __global__ void sobelFilterGPU(unsigned char* srcImg, unsigned char* dstImg, const unsigned int width, const unsigned int height){
     int x = threadIdx.x + blockIdx.x * blockDim.x;
     int y = threadIdx.y + blockIdx.y * blockDim.y;
-    // float dx, dy;
     if( x > 0 && y > 0 && x < width-1 && y < height-1) {
         float dx = (-1* srcImg[(y-1)*width + (x-1)]) + (-2*srcImg[y*width+(x-1)]) + (-1*srcImg[(y+1)*width+(x-1)]) +
              (    srcImg[(y-1)*width + (x+1)]) + ( 2*srcImg[y*width+(x+1)]) + (   srcImg[(y+1)*width+(x+1)]);
              
         float dy = (    srcImg[(y-1)*width + (x-1)]) + ( 2*srcImg[(y-1)*width+x]) + (   srcImg[(y-1)*width+(x+1)]) +
              (-1* srcImg[(y+1)*width + (x-1)]) + (-2*srcImg[(y+1)*width+x]) + (-1*srcImg[(y+1)*width+(x+1)]);
-        // dstImg[y*width + x] = sqrt( (dx*dx) + (dy*dy) );
         dstImg[y*width + x] = sqrt( (dx*dx) + (dy*dy) ) > 255 ? 255 : sqrt( (dx*dx) + (dy*dy) );
     }
 }
@@ -50,7 +48,6 @@ int main(int argc, char * argv[]){
     // Cargar imagen y la transforma a escala de grises
     cv::Mat srcImg = cv::imread(argv[1]); 
     cv::cvtColor(srcImg, srcImg, cv::COLOR_RGB2GRAY);
-    std::cout << "Image type: " << srcImg.type() << std::endl;
     cv::Mat sobel_cpu = cv::Mat::zeros(srcImg.size(),srcImg.type());
     cv::Mat sobel_opencv = cv::Mat::zeros(srcImg.size(), srcImg.type());
 
@@ -130,8 +127,7 @@ void sobelFilterCPU(cv::Mat srcImg, cv::Mat dstImg, const unsigned int width, co
             
             float dy = (srcImg.data[(y-1)*width + (x-1)]) + (2*srcImg.data[(y-1)*width+x]) + (srcImg.data[(y-1)*width+(x+1)]) +
             (-1*srcImg.data[(y+1)*width + (x-1)]) + (-2*srcImg.data[(y+1)*width+x]) + (-1*srcImg.data[(y+1)*width+(x+1)]);
-            // int sum = sqrt((dx*dx)+(dy*dy));
-            // dstImg.at<uchar>(y,x) = sum;
+            
             dstImg.at<uchar>(y,x) = sqrt( (dx*dx) + (dy*dy) ) > 255 ? 255 : sqrt( (dx*dx) + (dy*dy) );
         }
     }
