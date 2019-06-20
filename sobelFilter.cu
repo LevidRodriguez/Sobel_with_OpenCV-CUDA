@@ -22,8 +22,8 @@ __global__ void sobelFilterGPU(unsigned char* srcImg, unsigned char* dstImg, con
              
         float dy = (    srcImg[(y-1)*width + (x-1)]) + ( 2*srcImg[(y-1)*width+x]) + (   srcImg[(y-1)*width+(x+1)]) +
              (-1* srcImg[(y+1)*width + (x-1)]) + (-2*srcImg[(y+1)*width+x]) + (-1*srcImg[(y+1)*width+(x+1)]);
-        
-        dstImg[y*width + x] = sqrt( (dx*dx) + (dy*dy) );
+        // dstImg[y*width + x] = sqrt( (dx*dx) + (dy*dy) );
+        dstImg[y*width + x] = sqrt( (dx*dx) + (dy*dy) ) > 255 ? 255 : sqrt( (dx*dx) + (dy*dy) );
     }
 }
 
@@ -129,8 +129,9 @@ void sobelFilterCPU(cv::Mat srcImg, cv::Mat dstImg, const unsigned int width, co
             
             int dy = (srcImg.data[(y-1)*width + (x-1)]) + (2*srcImg.data[(y-1)*width+x]) + (srcImg.data[(y-1)*width+(x+1)]) +
             (-1*srcImg.data[(y+1)*width + (x-1)]) + (-2*srcImg.data[(y+1)*width+x]) + (-1*srcImg.data[(y+1)*width+(x+1)]);
-            int sum = sqrt((dx*dx)+(dy*dy));
-            dstImg.at<uchar>(y,x) = sum;
+            // int sum = sqrt((dx*dx)+(dy*dy));
+            // dstImg.at<uchar>(y,x) = sum;
+            dstImg.at<uchar>(y,x) = sqrt( (dx*dx) + (dy*dy) ) > 255 ? 255 : sqrt( (dx*dx) + (dy*dy) );
         }
     }
 }
