@@ -112,7 +112,6 @@ int main(int argc, char * argv[]){
     std::cout << "CPU execution time   = " << 1000*time_cpu.count() <<" msec"<<std::endl;
     std::cout << "OPENCV execution time   = " << 1000*time_opencv.count() <<" msec"<<std::endl;
     std::cout << "CUDA execution time   = " << 1000*time_gpu.count() <<" msec"<<std::endl;
-    std::cout << "CUDA execution time   = " << time_milliseconds <<" msec"<<std::endl;
     
     // Guarda resultados
     cv::imwrite("outImgCPU.png",sobel_cpu);    
