@@ -50,6 +50,7 @@ int main(int argc, char * argv[]){
     // Cargar imagen y la transforma a escala de grises
     cv::Mat srcImg = cv::imread(argv[1]); 
     cv::cvtColor(srcImg, srcImg, cv::COLOR_RGB2GRAY);
+    std::cout << "Image type: " << srcImg.type() << std::endl;
     cv::Mat sobel_cpu = cv::Mat::zeros(srcImg.size(),srcImg.type());
     cv::Mat sobel_opencv = cv::Mat::zeros(srcImg.size(), srcImg.type());
 
@@ -124,10 +125,10 @@ int main(int argc, char * argv[]){
 void sobelFilterCPU(cv::Mat srcImg, cv::Mat dstImg, const unsigned int width, const unsigned int height){
     for(int y = 1; y < srcImg.rows-1; y++) {
         for(int x = 1; x < srcImg.cols-1; x++) {
-            int dx = (-1*srcImg.data[(y-1)*width + (x-1)]) + (-2*srcImg.data[y*width+(x-1)]) + (-1*srcImg.data[(y+1)*width+(x-1)]) +
+            float dx = (-1*srcImg.data[(y-1)*width + (x-1)]) + (-2*srcImg.data[y*width+(x-1)]) + (-1*srcImg.data[(y+1)*width+(x-1)]) +
             (srcImg.data[(y-1)*width + (x+1)]) + (2*srcImg.data[y*width+(x+1)]) + (srcImg.data[(y+1)*width+(x+1)]);
             
-            int dy = (srcImg.data[(y-1)*width + (x-1)]) + (2*srcImg.data[(y-1)*width+x]) + (srcImg.data[(y-1)*width+(x+1)]) +
+            float dy = (srcImg.data[(y-1)*width + (x-1)]) + (2*srcImg.data[(y-1)*width+x]) + (srcImg.data[(y-1)*width+(x+1)]) +
             (-1*srcImg.data[(y+1)*width + (x-1)]) + (-2*srcImg.data[(y+1)*width+x]) + (-1*srcImg.data[(y+1)*width+(x+1)]);
             // int sum = sqrt((dx*dx)+(dy*dy));
             // dstImg.at<uchar>(y,x) = sum;
