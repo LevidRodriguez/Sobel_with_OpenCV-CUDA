@@ -8,7 +8,8 @@
 #include <opencv2/stitching.hpp>
 #include <opencv2/core/utility.hpp>
 
-#define GridSize 20.0 
+// #define GridSize 20.0 
+#define GridSize 40.0 
 void sobelFilterCPU(cv::Mat srcImg, cv::Mat dstImg, const unsigned int width, const unsigned int height);
 void sobelFilterOpenCV(cv::Mat srcImg, cv::Mat dstImg);
 
