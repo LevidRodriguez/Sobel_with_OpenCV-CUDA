@@ -8,7 +8,9 @@
 #include <opencv2/stitching.hpp>
 #include <opencv2/core/utility.hpp>
 
+// Numero de hilos por bloque
 #define threadsNumber 30.0 
+
 void sobelFilterCPU(cv::Mat srcImg, cv::Mat dstImg, const unsigned int width, const unsigned int height);
 void sobelFilterOpenCV(cv::Mat srcImg, cv::Mat dstImg);
 
@@ -80,7 +82,7 @@ int main(int argc, char * argv[]){
     cudaMemcpy(gpu_src, srcImg.data, (srcImg.cols*srcImg.rows), cudaMemcpyHostToDevice);
     cudaMemset(gpu_sobel, 0, (srcImg.cols*srcImg.rows));
 
-    // configura los dim3 para que gpu los use como argumentos, hilos por bloque y número de bloques
+    // configura los dim3 para que el gpu los use como argumentos, hilos por bloque y número de bloques
     dim3 threadsPerBlock(threadsNumber, threadsNumber, 1);
     dim3 numBlocks(ceil(srcImg.cols/threadsNumber), ceil(srcImg.rows/threadsNumber), 1);
     
