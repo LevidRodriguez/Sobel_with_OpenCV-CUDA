@@ -8,16 +8,16 @@ Para compilar:
  2. Entrar al directorio
   cd Sobel_with_OpenCV-CUDA
  3. Configurar CUDA (Para Google Colab)
-  pip install git+git://github.com/andreinechaev/nvcc4jupyter.git
+  ``` pip install git+git://github.com/andreinechaev/nvcc4jupyter.git ```
  4. Compilar
-  make all
- 5. Use: ./sobelFilter <image>
+  ``` make all ```
+ 5. Use: ``` ./sobelFilter <image> ```
  
  Los resultados son guardados en el mismo directorio como:
  
-1. outImgCPU.png --- Resultado de aplicar el filtro de sobel en CPU
-2. outImgOpenCV.png --- Resultado de aplicar el filtro de sobel con OpenCV
-3. outImgGPU.png --- Resultado de aplicar el filtro de sobel heterogéneo (GPU + CPU)
+1. ``` outImgCPU.png ``` --- Resultado de aplicar el filtro de sobel en CPU
+2. ``` outImgOpenCV.png ``` --- Resultado de aplicar el filtro de sobel con OpenCV
+3. ```outImgGPU.png ``` --- Resultado de aplicar el filtro de sobel heterogéneo (GPU + CPU)
  
  
   
