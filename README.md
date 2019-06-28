@@ -22,7 +22,7 @@ Para usar el codigo:
 2. ``` outImgOpenCV.png ``` --- Resultado de aplicar el filtro de sobel con OpenCV
 3. ```outImgGPU.png ``` --- Resultado de aplicar el filtro de sobel heterogéneo (GPU + CPU)
 
-Codigo compilado en:
+Codigo fue compilado en:
 * Ubuntu 18.04.2 LTS
 * GPU: Tesla T4
 * CUDA 7.5, 15079 Mbytes
