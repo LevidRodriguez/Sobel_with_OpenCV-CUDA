@@ -11,7 +11,7 @@ Para compilar:
   ``` pip install git+git://github.com/andreinechaev/nvcc4jupyter.git ```
  4. Compilar
   ``` make all ```
- 5. Use: ``` ./sobelFilter <image> ```
+ 5. Use: ``` ./sobelFilter <images/src_image> ```
  
  Los resultados son guardados en el mismo directorio como:
  
