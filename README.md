@@ -15,9 +15,9 @@ Para compilar:
  
  Los resultados son guardados en el mismo directorio como:
  
- outImgCPU.png --- Resultado de aplicar el filtro de sobel en CPU
- outImgOpenCV.png --- Resultado de aplicar el filtro de sobel con OpenCV
- outImgGPU.png --- Resultado de aplicar el filtro de sobel heterogéneo (GPU + CPU)
+1. outImgCPU.png --- Resultado de aplicar el filtro de sobel en CPU
+2. outImgOpenCV.png --- Resultado de aplicar el filtro de sobel con OpenCV
+3. outImgGPU.png --- Resultado de aplicar el filtro de sobel heterogéneo (GPU + CPU)
  
  
   
