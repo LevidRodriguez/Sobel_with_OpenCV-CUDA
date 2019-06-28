@@ -25,4 +25,4 @@ Para usar el codigo:
 Codigo fue compilado en:
 * Ubuntu 18.04.2 LTS
 * GPU: Tesla T4
-* CUDA 7.5, 15079 Mbytes
+* CUDA 7.5, 15,079 Mbytes
