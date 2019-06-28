@@ -2,7 +2,7 @@
 Using CUDA C/C++ to achieve Sobel Filter without using the built in function in OpenCV and reduce execution time.
 ## *Comparacion del filtro de Sobel implementado en CPU, OpenCV y CUDA*
 
-Para compilar:
+Para usar el codigo:
  1. Clonar repositorio:
   ``` git clone https://github.com/LevidRodriguez/Sobel_with_OpenCV-CUDA.git ```
  2. Entrar al directorio:
