@@ -4,7 +4,7 @@ Using CUDA C/C++ to achieve Sobel Filter without using the built in function in 
 
 Para compilar:
  1. Clonar repositorio
-  git clone https://github.com/LevidRodriguez/Sobel_with_OpenCV-CUDA.git
+  git clone ''' https://github.com/LevidRodriguez/Sobel_with_OpenCV-CUDA.git '''
  2. Entrar al directorio
   cd Sobel_with_OpenCV-CUDA
  3. Configurar CUDA (Para Google Colab)
