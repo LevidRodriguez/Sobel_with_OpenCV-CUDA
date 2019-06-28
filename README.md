@@ -3,16 +3,16 @@ Using CUDA C/C++ to achieve Sobel Filter without using the built in function in 
 ## *Comparacion del filtro de Sobel implementado en CPU, OpenCV y CUDA*
 
 Para compilar:
- 1. Clonar repositorio
+ 1. Clonar repositorio:
   ``` git clone https://github.com/LevidRodriguez/Sobel_with_OpenCV-CUDA.git ```
- 2. Entrar al directorio
+ 2. Entrar al directorio:
   ``` cd Sobel_with_OpenCV-CUDA ```
  3. Configurar CUDA (Para Google Colab)
   ``` 
   pip install git+git://github.com/andreinechaev/nvcc4jupyter.git 
   load_ext nvcc_plugin    
   ```
- 4. Compilar
+ 4. Compilar:
   ``` make all ```
  5. Use: ``` ./sobelFilter <images/src_image> ```
  
