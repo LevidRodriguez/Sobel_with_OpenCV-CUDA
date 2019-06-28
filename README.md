@@ -8,7 +8,8 @@ Para compilar:
  2. Entrar al directorio
   ``` cd Sobel_with_OpenCV-CUDA ```
  3. Configurar CUDA (Para Google Colab)
-  ``` pip install git+git://github.com/andreinechaev/nvcc4jupyter.git load_ext nvcc_plugin  ```
+  ``` pip install git+git://github.com/andreinechaev/nvcc4jupyter.git 
+  load_ext nvcc_plugin  ```
  4. Compilar
   ``` make all ```
  5. Use: ``` ./sobelFilter <images/src_image> ```
